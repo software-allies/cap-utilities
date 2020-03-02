@@ -108,9 +108,5 @@ dist
 
 *.d.ts
 src/**/*.d.ts
-*.j
-*.j.map
-*config.js
-*config.js.map
-*index.js
-*index.js.map
+*.js
+*.js.map

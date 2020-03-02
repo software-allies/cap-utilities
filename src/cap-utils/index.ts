@@ -23,7 +23,12 @@ import { addStyle } from '../cap-utils/config';
 import { getFileContent } from '@schematics/angular/utility/test';
 // import { addPackageToPackageJson } from './cap-utils/package';
 
-/** Remove content from specified file. */
+/**
+ * Remove content from specified file..
+ * @param host
+ * @param filePath Path of the file that's going to be deleted.
+ * @return True or false.
+ */
 export function removeContentFromFile(host: Tree, filePath: string) {
   const fileBuffer = host.read(filePath);
   if (!fileBuffer) {
@@ -33,7 +38,13 @@ export function removeContentFromFile(host: Tree, filePath: string) {
   return true;
 }
 
-/** Appends fragment to the specified file. */
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
 export function appendToStartFile(host: Tree, filePath: string, fragment: string) {
   const fileBuffer = host.read(filePath);
   if (!fileBuffer) {
@@ -51,6 +62,13 @@ export function appendToStartFile(host: Tree, filePath: string, fragment: string
   host.commitUpdate(recordedChange);
 }
 
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
 /** Appends the given element HTML fragment to the `<body>` element of the specified HTML file. */
 export function appendHtmlElementToBody(host: Tree, htmlFilePath: string, elementHtml: string, side: string = 'right') {
   const htmlFileBuffer = host.read(htmlFilePath);
@@ -97,7 +115,13 @@ export function appendHtmlElementToBody(host: Tree, htmlFilePath: string, elemen
 
 }
 
-/** Adds a class to the body of the document. */
+/**
+ * Adds a class to the body of the document..
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
 export function addBodyClass(host: Tree, htmlFilePath: string, className: string): void {
   const htmlFileBuffer = host.read(htmlFilePath);
 
@@ -132,12 +156,24 @@ export function addBodyClass(host: Tree, htmlFilePath: string, className: string
   }
 }
 
-/** Parses the given HTML file and returns the body element if available. */
+/**
+ * Parses the given HTML file and returns the body element if available.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
 export function getHtmlBodyTagElement(htmlContent: string): DefaultTreeElement | null {
   return getElementByTagName('body', htmlContent);
 }
 
-/** Finds an element by its tag name. */
+/**
+ * Finds an element by its tag name.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
 function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeElement | null {
   const document = parseHtml(htmlContent, { sourceCodeLocationInfo: true }) as DefaultTreeDocument;
   const nodeQueue = [...document.childNodes];
@@ -155,7 +191,14 @@ function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeE
   return null;
 }
 
-function updateBodyOfIndexFile(filePath: string, mainTag: Array<string>): Rule {
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
+export function updateBodyOfIndexFile(filePath: string, mainTag: Array<string>): Rule {
   return (tree: Tree) => {
 
     const toAddBegin =
@@ -173,7 +216,14 @@ ${mainTag[0]}`;
   }
 }
 
-function updateIndexFile(path: string, arrayLinks: Array<string>): Rule {
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
+export function updateIndexFile(path: string, arrayLinks: Array<string>): Rule {
   return (host: Tree) => {
     /** Appends the given element HTML fragment to the `<head>` element of the specified HTML file. */
     arrayLinks.map((element: string) => {
@@ -184,14 +234,28 @@ function updateIndexFile(path: string, arrayLinks: Array<string>): Rule {
   };
 }
 
-function removeContentFromAppComponentHtml(filePath: string): Rule {
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
+export function removeContentFromAppComponentHtml(filePath: string): Rule {
   return (host: Tree) => {
     removeContentFromFile(host, filePath);
     return host;
   };
 }
 
-function appendToAppComponentFile(filePath: string, options: any): Rule {
+/**
+* Appends fragment to the specified file.
+* @param host
+* @param filePath
+* @param fragment The maximum number of items to return.
+* @return all nodes of kind, or [] if none is found
+*/
+export function appendToAppComponentFile(filePath: string, options: any): Rule {
   return (host: Tree) => {
 
     if (options.removeAppComponentHtml) {
@@ -216,7 +280,14 @@ function appendToAppComponentFile(filePath: string, options: any): Rule {
   };
 }
 
-// addBootstrapCSS
+/**
+* addBootstrapCSS.
+* @param host
+* @param filePath
+* @param fragment The maximum number of items to return.
+* @return all nodes of kind, or [] if none is found
+*/
+// 
 function addExtraCSS(bootstrapPath: Array<string>): Rule {
   return (host: Tree) => {
     bootstrapPath.forEach(src => {
@@ -359,22 +430,30 @@ function addDeclarationToNgModule(options: any): Rule {
   };
 }
 
+
 export interface routerPathI {
   path: string;
   pathMatch: string;
   component: any
 }
 
-function addHomeRoute(routingPath: string, routersPath: object<routerPathI>): Rule {
+
+export function addHomeRoute(srcFile: string, routersPath: Array<routerPathI>, fileImport: string): Rule {
   return (host: Tree) => {
 
-    const filePath = routingPath;
+    const filePath = srcFile;
 
     // Add routes to routing
-    const toAdd =
-      `
-    { path: '', pathMatch: 'full', component: HomeComponent },
-    { path: 'home', pathMatch: 'full', component: HomeComponent },`;
+    let toAdd = ''
+    routersPath.forEach(data => {
+      toAdd = toAdd + `{
+        path:'${data.path}', pathMatch: '${data.pathMatch}', component: ${data.component}}, `
+    });
+    console.log('toAdd: ', toAdd);
+    // const toAdd = 
+    //   `
+    // { path: '', pathMatch: 'full', component: HomeComponent },
+    // { path: 'home', pathMatch: 'full', component: HomeComponent },`;
 
     const component = getFileContent(host, filePath);
     host.overwrite(filePath, component.replace(`const routes: Routes = [`, `const routes: Routes = [${toAdd}`));
@@ -382,9 +461,8 @@ function addHomeRoute(routingPath: string, routersPath: object<routerPathI>): Ru
     // Add import to routing
     const content =
       `
-import { HomeComponent } from './home/home.component';`;
+${fileImport}`;
     appendToStartFile(host, filePath, content);
-
     return host;
   };
 }
