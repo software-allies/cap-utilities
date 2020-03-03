@@ -1,34 +1,40 @@
+import * as ts from 'typescript';
+import { strings } from '@angular-devkit/core';
+import { addStyle } from '../cap-utils/config';
+import { InsertChange } from '@schematics/angular/utility/change';
+import { getFileContent } from '@schematics/angular/utility/test';
 import { getChildElementIndentation } from '@angular/cdk/schematics/utils/parse5-element';
 import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
-import { strings } from '@angular-devkit/core';
+import { appendHtmlElementToHead } from '@angular/cdk/schematics/utils/html-head-element';
 import {
   Rule,
   SchematicsException,
   Tree,
   UpdateRecorder,
 } from '@angular-devkit/schematics';
-import { InsertChange } from '@schematics/angular/utility/change';
 import {
   buildRelativePath,
 } from '@schematics/angular/utility/find-module';
-import { appendHtmlElementToHead } from '@angular/cdk/schematics/utils/html-head-element';
 import {
   addDeclarationToModule,
   addProviderToModule,
   addImportToModule
 } from '../vendored-ast-utils';
-
-import * as ts from 'typescript';
-import { addStyle } from '../cap-utils/config';
-import { getFileContent } from '@schematics/angular/utility/test';
 // import { addPackageToPackageJson } from './cap-utils/package';
 
+//Importing interfaces
+import { OptionsI } from '../interface/options';
+import { routerPathI } from '../interface/router';
+import { componentsPathI } from '../interface/componentPath';
+
+
+
 /**
- * Remove content from specified file..
+ * Remove content from specified file.
  * @param host
  * @param filePath Path of the file that's going to be deleted.
- * @return True or false.
- */
+ * @return rue or an error in case that the process wasn't it successfully completed.
+*/
 export function removeContentFromFile(host: Tree, filePath: string) {
   const fileBuffer = host.read(filePath);
   if (!fileBuffer) {
@@ -44,7 +50,7 @@ export function removeContentFromFile(host: Tree, filePath: string) {
  * @param filePath
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
- */
+*/
 export function appendToStartFile(host: Tree, filePath: string, fragment: string) {
   const fileBuffer = host.read(filePath);
   if (!fileBuffer) {
@@ -121,7 +127,7 @@ export function appendHtmlElementToBody(host: Tree, htmlFilePath: string, elemen
  * @param filePath
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
- */
+*/
 export function addBodyClass(host: Tree, htmlFilePath: string, className: string): void {
   const htmlFileBuffer = host.read(htmlFilePath);
 
@@ -162,7 +168,7 @@ export function addBodyClass(host: Tree, htmlFilePath: string, className: string
  * @param filePath
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
- */
+*/
 export function getHtmlBodyTagElement(htmlContent: string): DefaultTreeElement | null {
   return getElementByTagName('body', htmlContent);
 }
@@ -170,10 +176,10 @@ export function getHtmlBodyTagElement(htmlContent: string): DefaultTreeElement |
 /**
  * Finds an element by its tag name.
  * @param host
- * @param filePath
+ * @param filePath Path of the file that's going to verify.
  * @param fragment The maximum number of items to return.
- * @return all nodes of kind, or [] if none is found
- */
+ * @return The function returns either a node or a null in case that it wasn't found it
+*/
 function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeElement | null {
   const document = parseHtml(htmlContent, { sourceCodeLocationInfo: true }) as DefaultTreeDocument;
   const nodeQueue = [...document.childNodes];
@@ -187,7 +193,6 @@ function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeE
       nodeQueue.push(...node.childNodes);
     }
   }
-
   return null;
 }
 
@@ -197,8 +202,8 @@ function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeE
  * @param filePath
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
- */
-export function updateBodyOfIndexFile(filePath: string, mainTag: Array<string>): Rule {
+*/
+export function updateBodyOfIndexFile(filePath: string, mainTag: string[]): Rule {
   return (tree: Tree) => {
 
     const toAddBegin =
@@ -222,8 +227,8 @@ ${mainTag[0]}`;
  * @param filePath
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
- */
-export function updateIndexFile(path: string, arrayLinks: Array<string>): Rule {
+*/
+export function updateIndexFile(path: string, arrayLinks: string[]): Rule {
   return (host: Tree) => {
     /** Appends the given element HTML fragment to the `<head>` element of the specified HTML file. */
     arrayLinks.map((element: string) => {
@@ -240,7 +245,7 @@ export function updateIndexFile(path: string, arrayLinks: Array<string>): Rule {
  * @param filePath
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
- */
+*/
 export function removeContentFromAppComponentHtml(filePath: string): Rule {
   return (host: Tree) => {
     removeContentFromFile(host, filePath);
@@ -249,16 +254,14 @@ export function removeContentFromAppComponentHtml(filePath: string): Rule {
 }
 
 /**
-* Appends fragment to the specified file.
-* @param host
-* @param filePath
-* @param fragment The maximum number of items to return.
-* @return all nodes of kind, or [] if none is found
+  * Appends fragment to the specified file.
+  * @param host
+  * @param options
+  * @return all nodes of kind, or [] if none is found
 */
-export function appendToAppComponentFile(filePath: string, options: any): Rule {
+export function appendToAppComponentFile(filePath: string, options: OptionsI): Rule {
   return (host: Tree) => {
-
-    if (options.removeAppComponentHtml) {
+    if (options.rvContentFromAppHTML) {
       const content =
         `<div id="main">
   <router-outlet></router-outlet>
@@ -287,8 +290,7 @@ export function appendToAppComponentFile(filePath: string, options: any): Rule {
 * @param fragment The maximum number of items to return.
 * @return all nodes of kind, or [] if none is found
 */
-// 
-function addExtraCSS(bootstrapPath: Array<string>): Rule {
+function addExtraCSS(bootstrapPath: string[]): Rule {
   return (host: Tree) => {
     bootstrapPath.forEach(src => {
       addStyle(host, `${src}`);
@@ -308,6 +310,12 @@ function appendToStylesFile(path: string, style: string): Rule {
   };
 }
 
+/**
+  * Appends fragment to the specified file.
+  * @param host
+  * @param options
+  * @return all nodes of kind, or [] if none is found
+*/
 function readIntoSourceFile(host: Tree, filePath: string) {
   const text = host.read(filePath);
   if (text === null) {
@@ -316,129 +324,69 @@ function readIntoSourceFile(host: Tree, filePath: string) {
   return ts.createSourceFile(filePath, text.toString('utf-8'), ts.ScriptTarget.Latest, true);
 }
 
-function addDeclarationToNgModule(options: any): Rule {
+/**
+  * Add the a modules, components or services into the declaration module
+  * @param options 
+  * @param componentsPaths 
+  * @return a updated host
+*/
+export function addDeclarationToNgModule(options: OptionsI, componentsPaths: componentsPathI[]): Rule {
   return (host: Tree) => {
-
-    const modulePath = options.module;
+    let source;
+    const modulePath = options.modulePath;
     // Import Header Component and declare
-    let source = readIntoSourceFile(host, modulePath);
-    const componentPath = `${options.path}/app/header/header.component`;
-    const relativePath = buildRelativePath(modulePath, componentPath);
-    const classifiedName = strings.classify(`HeaderComponent`);
-    const declarationChanges: any = addDeclarationToModule(
-      source,
-      modulePath,
-      classifiedName,
-      relativePath);
+    componentsPaths.forEach(component => {
+      // Import and include on Imports the HttpClientModule
+      if (component.isAService) {
+        // Need to refresh the AST because we overwrote the file in the host.
+        source = readIntoSourceFile(host, modulePath);
+        const servicePath = `@angular/common/http`;
+        const relativePath = servicePath;
+        const classifiedName = strings.classify(`HttpClientModule`);
+        const providerRecorder = host.beginUpdate(modulePath);
+        const providerChanges: any = addImportToModule(
+          source,
+          modulePath,
+          classifiedName,
+          relativePath);
 
-    const declarationRecorder = host.beginUpdate(modulePath);
-    for (const change of declarationChanges) {
-      if (change instanceof InsertChange) {
-        declarationRecorder.insertLeft(change.pos, change.toAdd);
-      }
-    }
-    host.commitUpdate(declarationRecorder);
-
-    // Import and include on Imports the FooterComponent
-    if (options) {
-      // Need to refresh the AST because we overwrote the file in the host.
-      let source = readIntoSourceFile(host, modulePath);
-      const componentPath = `${options.path}/app/footer/footer.component`;
-      const relativePath = buildRelativePath(modulePath, componentPath);
-      const classifiedName = strings.classify(`FooterComponent`);
-      const declarationChanges: any = addDeclarationToModule(
-        source,
-        modulePath,
-        classifiedName,
-        relativePath);
-
-      const declarationRecorder = host.beginUpdate(modulePath);
-      for (const change of declarationChanges) {
-        if (change instanceof InsertChange) {
-          declarationRecorder.insertLeft(change.pos, change.toAdd);
+        for (const change of providerChanges) {
+          if (change instanceof InsertChange) {
+            providerRecorder.insertLeft(change.pos, change.toAdd);
+          }
         }
-      }
-      host.commitUpdate(declarationRecorder);
-    }
+        host.commitUpdate(providerRecorder);
+      } else {
+        source = readIntoSourceFile(host, modulePath);
+        const componentPath = `${options.projectPath}/${component.componentPath}`;
+        const relativePath = buildRelativePath(modulePath, componentPath);
+        const classifiedName = strings.classify(`${component.componentName}`);
+        const declarationChanges: any = addDeclarationToModule(
+          source,
+          modulePath,
+          classifiedName,
+          relativePath);
 
-    // Import and include on Imports the HttpClientModule
-    if (options) {
-      // Need to refresh the AST because we overwrote the file in the host.
-      source = readIntoSourceFile(host, modulePath);
-      const servicePath = `@angular/common/http`;
-      const relativePath = servicePath;
-      const classifiedName = strings.classify(`HttpClientModule`);
-      const providerRecorder = host.beginUpdate(modulePath);
-      const providerChanges: any = addImportToModule(
-        source,
-        modulePath,
-        classifiedName,
-        relativePath);
-
-      for (const change of providerChanges) {
-        if (change instanceof InsertChange) {
-          providerRecorder.insertLeft(change.pos, change.toAdd);
+        const declarationRecorder = host.beginUpdate(modulePath);
+        for (const change of declarationChanges) {
+          if (change instanceof InsertChange) {
+            declarationRecorder.insertLeft(change.pos, change.toAdd);
+          }
         }
+        host.commitUpdate(declarationRecorder);
       }
-      host.commitUpdate(providerRecorder);
-    }
-
-    // Import and include on Imports the HomeModule
-    if (options) {
-      // Need to refresh the AST because we overwrote the file in the host.
-      source = readIntoSourceFile(host, modulePath);
-      const componentPath = `${options.path}/app/home/home.module`;
-      const relativePath = buildRelativePath(modulePath, componentPath);
-      const classifiedName = strings.classify(`HomeModule`);
-      const providerRecorder = host.beginUpdate(modulePath);
-      const providerChanges: any = addImportToModule(
-        source,
-        modulePath,
-        classifiedName,
-        relativePath);
-
-      for (const change of providerChanges) {
-        if (change instanceof InsertChange) {
-          providerRecorder.insertLeft(change.pos, change.toAdd);
-        }
-      }
-      host.commitUpdate(providerRecorder);
-    }
-
-    // Import and include on Providers the load script ScriptService
-    if (options) {
-      // Need to refresh the AST because we overwrote the file in the host.
-      source = readIntoSourceFile(host, modulePath);
-      const servicePath = `${options.path}/app/shared/services/load-scripts.service`;
-      const relativePath = buildRelativePath(modulePath, servicePath);
-      const classifiedName = strings.classify(`ScriptService`);
-      const providerRecorder = host.beginUpdate(modulePath);
-      const providerChanges: any = addProviderToModule(
-        source,
-        modulePath,
-        classifiedName,
-        relativePath);
-
-      for (const change of providerChanges) {
-        if (change instanceof InsertChange) {
-          providerRecorder.insertLeft(change.pos, change.toAdd);
-        }
-      }
-      host.commitUpdate(providerRecorder);
-    }
+    });
     return host;
   };
 }
 
-
-export interface routerPathI {
-  path: string;
-  pathMatch: string;
-  component: any
-}
-
-
-export function addHomeRoute(srcFile: string, routersPath: Array<routerPathI>, fileImport: string): Rule {
+/**
+  * Appends fragment to the specified file.
+  * @param host
+  * @param options
+  * @return all nodes of kind, or [] if none is found
+*/
+export function addHomeRoute(srcFile: string, routersPath: routerPathI[], fileImport: string): Rule {
   return (host: Tree) => {
 
     const filePath = srcFile;
