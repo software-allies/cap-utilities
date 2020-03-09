@@ -1,9 +1,407 @@
-import { normalize } from '@angular-devkit/core';
-import { SchematicsException, Tree } from '@angular-devkit/schematics';
-import { Change, InsertChange, NoopChange } from '@schematics/angular/utility/change';
-import { dirname } from 'path';
-
 import * as ts from 'typescript';
+import { strings } from '@angular-devkit/core';
+import { dirname } from 'path';
+import { normalize } from '@angular-devkit/core';
+import { getFileContent } from '@schematics/angular/utility/test';
+import { buildRelativePath } from '@schematics/angular/utility/find-module';
+import { appendHtmlElementToHead } from '@angular/cdk/schematics/utils/html-head-element';
+import { getChildElementIndentation } from '@angular/cdk/schematics/utils/parse5-element';
+import { InsertChange, Change, NoopChange } from '@schematics/angular/utility/change';
+import { Rule, SchematicsException, Tree, UpdateRecorder, } from '@angular-devkit/schematics';
+import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
+
+//Importing interfaces
+import { OptionsI } from './interface/options';
+import { routerPathI } from './interface/router';
+import { importElementsModule } from './interface/componentPath';
+
+const CONFIG_PATH = 'angular.json';
+
+let source;
+let elementPath;
+let relativePath;
+let classifiedName;
+let declarationChanges;
+let declarationRecorder;
+
+
+/**
+ * Remove content from specified file.
+ * @param host
+ * @param filePath Path of the file that's going to be deleted.
+ * @return True or an error in case that the process wasn't it successfully completed.
+*/
+export function removeContentFromFile(host: Tree, filePath: string) {
+  const fileBuffer = host.read(filePath);
+  if (!fileBuffer) {
+    throw new SchematicsException(`Could not read file for path: ${filePath}.`);
+  }
+  host.overwrite(filePath, '');
+  return host;
+}
+
+/**
+ * Appends a fragment to the start file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return A tree with the updates
+*/
+export function appendToStartFile(host: Tree, filePath: string, fragment: string) {
+  const fileBuffer = host.read(filePath);
+  if (!fileBuffer) {
+    throw new SchematicsException(`Could not read file for path: ${filePath}.`);
+  }
+  const content = fileBuffer.toString();
+  if (content.includes(fragment)) {
+    return;
+  }
+  const insertion = `${' '.repeat(0)}${fragment}`;
+  let recordedChange: UpdateRecorder;
+  recordedChange = host
+    .beginUpdate(filePath)
+    .insertRight(0, `${insertion}\n`);
+  host.commitUpdate(recordedChange);
+}
+
+/**
+ * Appends the given element HTML fragment to the `<body>` element of the specified HTML file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+ */
+export function appendHtmlElementToBody(host: Tree, htmlFilePath: string, elementHtml: string, side: string = 'right') {
+  const htmlFileBuffer = host.read(htmlFilePath);
+
+  if (!htmlFileBuffer) {
+    throw new SchematicsException(`Could not read file for path: ${htmlFilePath}`);
+  }
+
+  const htmlContent = htmlFileBuffer.toString();
+
+  if (htmlContent.includes(elementHtml)) {
+    return;
+  }
+
+  const bodyTag = getHtmlBodyTagElement(htmlContent);
+
+  if (!bodyTag) {
+    throw Error(`Could not find '<body>' element in HTML file: ${htmlFileBuffer}`);
+  }
+
+  // We always have access to the source code location here because the `getHtmlBodyTagElement`
+  // function explicitly has the `sourceCodeLocationInfo` option enabled.
+
+  if (bodyTag.sourceCodeLocation!.endTag) {
+    const endTagOffset = bodyTag.sourceCodeLocation!.endTag.startOffset;
+    const startTagOffset = bodyTag.sourceCodeLocation!.startTag.endOffset;
+    const indentationOffset = getChildElementIndentation(bodyTag);
+    const insertion = `${' '.repeat(indentationOffset)}${elementHtml}`;
+
+    let recordedChange: UpdateRecorder;
+
+    if (side === 'left') {
+      recordedChange = host
+        .beginUpdate(htmlFilePath)
+        .insertLeft(startTagOffset, `${insertion}\n`);
+      host.commitUpdate(recordedChange);
+    } else if (side === 'right') {
+      recordedChange = host
+        .beginUpdate(htmlFilePath)
+        .insertRight(endTagOffset, `${insertion}\n`);
+      host.commitUpdate(recordedChange);
+    }
+  }
+
+}
+
+/**
+ * Adds a class to the body of the document..
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+*/
+export function addBodyClass(host: Tree, htmlFilePath: string, className: string): void {
+  const htmlFileBuffer = host.read(htmlFilePath);
+
+  if (!htmlFileBuffer) {
+    throw new SchematicsException(`Could not read file for path: ${htmlFilePath}`);
+  }
+
+  const htmlContent = htmlFileBuffer.toString();
+  const body = getElementByTagName('body', htmlContent);
+
+  if (!body) {
+    throw Error(`Could not find <body> element in HTML file: ${htmlFileBuffer}`);
+  }
+
+  const classAttribute = body.attrs.find(attribute => attribute.name === 'class');
+
+  if (classAttribute) {
+    const hasClass = classAttribute.value.split(' ').map(part => part.trim()).includes(className);
+
+    if (!hasClass) {
+      const classAttributeLocation = body.sourceCodeLocation!.attrs.class;
+      const recordedChange = host
+        .beginUpdate(htmlFilePath)
+        .insertRight(classAttributeLocation.endOffset - 1, ` ${className}`);
+      host.commitUpdate(recordedChange);
+    }
+  } else {
+    const recordedChange = host
+      .beginUpdate(htmlFilePath)
+      .insertRight(body.sourceCodeLocation!.startTag.endOffset - 1, ` class="${className}"`);
+    host.commitUpdate(recordedChange);
+  }
+}
+
+/**
+ * Parses the given HTML file and returns the body element if available.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+*/
+export function getHtmlBodyTagElement(htmlContent: string): DefaultTreeElement | null {
+  return getElementByTagName('body', htmlContent);
+}
+
+/**
+ * Finds an element by its tag name.
+ * @param host
+ * @param filePath Path of the file that's going to verify.
+ * @param fragment The maximum number of items to return.
+ * @return The function returns either a node or a null in case that it wasn't found it
+*/
+function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeElement | null {
+  const document = parseHtml(htmlContent, { sourceCodeLocationInfo: true }) as DefaultTreeDocument;
+  const nodeQueue = [...document.childNodes];
+
+  while (nodeQueue.length) {
+    const node = nodeQueue.shift() as DefaultTreeElement;
+
+    if (node.nodeName.toLowerCase() === tagName) {
+      return node;
+    } else if (node.childNodes) {
+      nodeQueue.push(...node.childNodes);
+    }
+  }
+  return null;
+}
+
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+*/
+export function updateBodyOfIndexFile(filePath: string, mainTag: string[]): Rule {
+  return (tree: Tree) => {
+
+    const toAddBegin =
+      `
+${mainTag[0]}`;
+
+    const toAddFinal =
+      `${mainTag[1]}`;
+
+    const component = getFileContent(tree, filePath);
+    tree.overwrite(filePath, component.replace(`<body>`, `<body>${toAddBegin}`));
+
+    const componentAfter = getFileContent(tree, filePath);
+    tree.overwrite(filePath, componentAfter.replace(`</body>`, `${toAddFinal}</body>`));
+  }
+}
+
+/**
+ * Appends fragment to the specified file.
+ * @param host
+ * @param filePath
+ * @param fragment The maximum number of items to return.
+ * @return all nodes of kind, or [] if none is found
+*/
+export function updateIndexFile(hostP: Tree, path: string, arrayLinks: string[]): Rule {
+  return (host: Tree = hostP) => {
+    /** Appends the given element HTML fragment to the `<head>` element of the specified HTML file. */
+    arrayLinks.map((element: string) => {
+      appendHtmlElementToHead(host, path, element);
+    });
+
+    return host;
+  };
+}
+
+/**
+* addBootstrapCSS.
+* @param host
+* @param filePath
+* @param fragment The maximum number of items to return.
+* @return all nodes of kind, or [] if none is found
+*/
+export function addCSSStyles(hostP: Tree, bootstrapPath: string[]) {
+  bootstrapPath.forEach(src => {
+    addStyle(hostP, `${src}`);
+  });
+}
+
+/**
+  * Appends fragment to the specified file.
+  * @param host
+  * @param options
+  * @return all nodes of kind, or [] if none is found
+*/
+function readIntoSourceFile(host: Tree, filePath: string) {
+  const text = host.read(filePath);
+  if (text === null) {
+    throw new SchematicsException(`File ${filePath} does not exist.`);
+  }
+  return ts.createSourceFile(filePath, text.toString('utf-8'), ts.ScriptTarget.Latest, true);
+}
+
+
+function resetValuesImports() {
+  declarationChanges = null;
+  declarationRecorder = null;
+  elementPath = null;
+  relativePath = null;
+  classifiedName = null;
+  declarationChanges = null;
+  declarationRecorder = null;
+}
+/**
+  * Add the a modules, components or services into the declaration module
+  * @param options 
+  * @param componentsPaths 
+  * @return a updated host
+*/
+export function addDeclarationToNgModule(host: Tree, options: OptionsI, elementsToImport: importElementsModule[]) {
+
+  const modulePath = options.modulePath;
+  // Import Header Component and declare
+
+  elementsToImport.forEach(element => {
+
+    switch (element.type.toUpperCase()) {
+      case 'COMPONENT':
+
+        source = source = readIntoSourceFile(host, modulePath);
+        resetValuesImports();
+
+        elementPath = `${options.projectPath}/${element.path}`;
+        relativePath = buildRelativePath(modulePath, elementPath);
+        classifiedName = strings.classify(`${element.name}`);
+        declarationChanges = addDeclarationToModule(
+          source,
+          modulePath,
+          classifiedName,
+          relativePath);
+
+        declarationRecorder = host.beginUpdate(modulePath);
+        for (const change of declarationChanges) {
+          if (change instanceof InsertChange) {
+            declarationRecorder.insertLeft(change.pos, change.toAdd);
+          }
+        }
+        host.commitUpdate(declarationRecorder);
+        break;
+      case 'MODULE':
+
+        source = source = readIntoSourceFile(host, modulePath);
+        resetValuesImports();
+
+        if (element.path.charAt(0) === '@') {
+          relativePath = element.path;
+        } else {
+          elementPath = `${options.projectPath}/${element.path}`;
+          relativePath = buildRelativePath(modulePath, elementPath);
+        }
+        classifiedName = strings.classify(`${element.name}`);
+        declarationChanges = addImportToModule(
+          source,
+          modulePath,
+          classifiedName,
+          relativePath);
+
+        declarationRecorder = host.beginUpdate(modulePath);
+        for (const change of declarationChanges) {
+          if (change instanceof InsertChange) {
+            declarationRecorder.insertLeft(change.pos, change.toAdd);
+          }
+        }
+        host.commitUpdate(declarationRecorder);
+
+        break;
+
+      default:
+        source = source = readIntoSourceFile(host, modulePath);
+        resetValuesImports();
+        // Need to refresh the AST because we overwrote the file in the host.
+        relativePath = `../${element.path}`;
+        classifiedName = strings.classify(element.name);
+        const providerRecorder = host.beginUpdate(modulePath);
+        addProviderToModule
+        const providerChanges: any = addProviderToModule(
+          source,
+          modulePath,
+          classifiedName,
+          relativePath);
+
+        for (const change of providerChanges) {
+          if (change instanceof InsertChange) {
+            providerRecorder.insertLeft(change.pos, change.toAdd);
+          }
+        }
+        host.commitUpdate(providerRecorder);
+        break;
+    }
+
+  });
+
+}
+
+/**
+  * Appends fragment to the specified file.
+  * @param host
+  * @param options
+  * @return a updated file all nodes of kind, or [] if none is found
+*/
+export function addRoutes(host: Tree, srcFile: string, routersPath: routerPathI[], fileImport: string): Rule {
+  return (hostP: Tree = host) => {
+
+    const filePath = srcFile;
+
+    // Add routes to routing
+    let toAdd = ''
+    routersPath.forEach(data => {
+      toAdd = toAdd + `{
+        path:'${data.path}', pathMatch: '${data.pathMatch}', component: ${data.component}}, `
+    });
+
+    const component = getFileContent(hostP, filePath);
+    hostP.overwrite(filePath, component.replace(`const routes: Routes = [`, `const routes: Routes = [${toAdd}`));
+
+    // Add import to routing
+    const content =
+      `
+${fileImport}`;
+
+    appendToStartFile(hostP, filePath, content);
+    return hostP;
+  };
+}
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Add Import `import { symbolName } from fileName` if the import doesn't exit 
@@ -560,4 +958,114 @@ export function getAppModulePath(host: Tree, mainPath: string): string {
   const modulePath = normalize(`/${mainDir}/${moduleRelativePath}.ts`);
 
   return modulePath;
+}
+
+
+
+
+export function readConfig(host: Tree) {
+  const sourceText = host.read(CONFIG_PATH)!.toString('utf-8');
+  return JSON.parse(sourceText);
+}
+
+export function writeConfig(host: Tree, config: JSON) {
+  host.overwrite(CONFIG_PATH, JSON.stringify(config, null, 2));
+}
+
+export function getAppName(config: any): string | null {
+  const projects = config.projects;
+  const projectNames = Object.keys(projects);
+  for (let projectName of projectNames) {
+    const projectConfig = projects[projectName];
+    if (isAngularBrowserProject(projectConfig)) {
+      return projectName;
+    }
+  }
+  return null;
+}
+
+function isAngularBrowserProject(projectConfig: any) {
+  if (projectConfig.projectType === 'application') {
+    const buildConfig = projectConfig.architect.build;
+    return buildConfig.builder === '@angular-devkit/build-angular:browser';
+  }
+  return false;
+}
+
+function getAngularAppConfig(config: any): any | null {
+  const projects = config.projects;
+  const projectNames = Object.keys(projects);
+  for (let projectName of projectNames) {
+    const projectConfig = projects[projectName];
+    if (isAngularBrowserProject(projectConfig)) {
+      return projectConfig;
+    }
+  }
+  return null;
+}
+
+export function addStyle(host: Tree, stylePath: string) {
+  const config = readConfig(host);
+  const appConfig = getAngularAppConfig(config);
+  if (appConfig) {
+    appConfig.architect.build.options.styles.push({
+      input: stylePath
+    });
+    writeConfig(host, config);
+  } else {
+    console.log("Can't find an app.");
+  }
+}
+
+export function hasBootstrap(host: Tree): boolean {
+  const config = readConfig(host);
+  const appConfig = getAngularAppConfig(config);
+  let _hasBootstrap = false;
+  if (appConfig) {
+    const styles = appConfig.architect.build.options.styles;
+    if (styles) {
+      for (let style in styles) {
+        if (styles[style].input && typeof (styles[style].input) === "string") {
+          if (styles[style].input.includes('bootstrap')) {
+            console.log("Bootstrap is already used.");
+            _hasBootstrap = true;
+          }
+        } else if (styles[style] && typeof (styles[style]) === "string") {
+          if (styles[style].includes('bootstrap')) {
+            console.log("Bootstrap is already used.");
+            _hasBootstrap = true;
+          }
+        }
+      }
+    }
+    return _hasBootstrap;
+  } else {
+    console.log("This is not a Angular application.");
+    return false;
+  }
+}
+
+
+/**
+ * Adds a package to the package.json
+ */
+export function addPackageToPackageJson(host: Tree, type: string, pkg: string, version: string) {
+  if (host.exists('package.json')) {
+    const sourceText = host.read('package.json')!.toString('utf-8');
+    const json = JSON.parse(sourceText);
+    if (!json[type]) {
+      json[type] = {};
+    }
+    if (!json[type][pkg]) {
+      json[type][pkg] = version;
+    }
+    host.overwrite('package.json', JSON.stringify(json, null, 2));
+  }
+  return host;
+}
+
+export function getAppNameFromPackageJSON(host: Tree): string {
+  const sourceText = host.read('package.json')!.toString('utf-8');
+  const json = JSON.parse(sourceText);
+  return json.name;
 }
