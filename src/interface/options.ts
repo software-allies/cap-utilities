@@ -12,15 +12,7 @@
   * @param environments Save all the environments into an array.
 */
 export interface OptionsI {
-  projectName: string;
-  logoUrl: string;
-  rvContentFromHTML: boolean;
-  includeAuthLogin: boolean;
-  installAuth: boolean;
-  includeSFCore: boolean;
-  authService: string;
-  projectPath?: string;
-  modulePath?: any;
-  environments?: [];
-  
+  project?: string;
+  module?: any;
+  path?: any;
 };

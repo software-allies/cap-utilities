@@ -13,7 +13,7 @@ import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'par
 //Importing interfaces
 import { OptionsI } from './interface/options';
 import { routerPathI } from './interface/router';
-import { importElementsModule } from './interface/componentPath';
+import { importElementsModule } from './interface/imports';
 
 const CONFIG_PATH = 'angular.json';
 
@@ -29,7 +29,7 @@ let declarationRecorder;
  * Remove content from specified file.
  * @param host
  * @param filePath Path of the file that's going to be deleted.
- * @return True or an error in case that the process wasn't it successfully completed.
+ * @return The updated tree.
 */
 export function removeContentFromFile(host: Tree, filePath: string) {
   const fileBuffer = host.read(filePath);
@@ -164,7 +164,7 @@ export function addBodyClass(host: Tree, htmlFilePath: string, className: string
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
 */
-export function getHtmlBodyTagElement(htmlContent: string): DefaultTreeElement | null {
+function getHtmlBodyTagElement(htmlContent: string): DefaultTreeElement | null {
   return getElementByTagName('body', htmlContent);
 }
 
@@ -198,32 +198,8 @@ function getElementByTagName(tagName: string, htmlContent: string): DefaultTreeE
  * @param fragment The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
 */
-export function updateBodyOfIndexFile(filePath: string, mainTag: string[]): Rule {
-  return (tree: Tree) => {
 
-    const toAddBegin =
-      `
-${mainTag[0]}`;
-
-    const toAddFinal =
-      `${mainTag[1]}`;
-
-    const component = getFileContent(tree, filePath);
-    tree.overwrite(filePath, component.replace(`<body>`, `<body>${toAddBegin}`));
-
-    const componentAfter = getFileContent(tree, filePath);
-    tree.overwrite(filePath, componentAfter.replace(`</body>`, `${toAddFinal}</body>`));
-  }
-}
-
-/**
- * Appends fragment to the specified file.
- * @param host
- * @param filePath
- * @param fragment The maximum number of items to return.
- * @return all nodes of kind, or [] if none is found
-*/
-export function updateIndexFile(hostP: Tree, path: string, arrayLinks: string[]): Rule {
+export function updateIndexHeadFile(hostP: Tree, path: string, arrayLinks: string[]): Rule {
   return (host: Tree = hostP) => {
     /** Appends the given element HTML fragment to the `<head>` element of the specified HTML file. */
     arrayLinks.map((element: string) => {
@@ -237,13 +213,12 @@ export function updateIndexFile(hostP: Tree, path: string, arrayLinks: string[])
 /**
 * addBootstrapCSS.
 * @param host
-* @param filePath
-* @param fragment The maximum number of items to return.
+* @param stylePaths
 * @return all nodes of kind, or [] if none is found
 */
-export function addCSSStyles(hostP: Tree, bootstrapPath: string[]) {
-  bootstrapPath.forEach(src => {
-    addStyle(hostP, `${src}`);
+export function addStyles(host: Tree, stylePaths: string[]) {
+  stylePaths.forEach(src => {
+    addStyle(host, `${src}`);
   });
 }
 
@@ -253,7 +228,7 @@ export function addCSSStyles(hostP: Tree, bootstrapPath: string[]) {
   * @param options
   * @return all nodes of kind, or [] if none is found
 */
-function readIntoSourceFile(host: Tree, filePath: string) {
+export function readIntoSourceFile(host: Tree, filePath: string) {
   const text = host.read(filePath);
   if (text === null) {
     throw new SchematicsException(`File ${filePath} does not exist.`);
@@ -274,23 +249,23 @@ function resetValuesImports() {
 /**
   * Add the a modules, components or services into the declaration module
   * @param options 
-  * @param componentsPaths 
+  * @param elementsToImport @interface importElementsModule
   * @return a updated host
 */
-export function addDeclarationToNgModule(host: Tree, options: OptionsI, elementsToImport: importElementsModule[]) {
+export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: importElementsModule[]) {
 
-  const modulePath = options.modulePath;
+  const modulePath = options.module;
   // Import Header Component and declare
 
   elementsToImport.forEach(element => {
 
     switch (element.type.toUpperCase()) {
-      case 'COMPONENT':
+      case 'COMPONENT' || 'DIRECTIVE':
 
         source = source = readIntoSourceFile(host, modulePath);
         resetValuesImports();
 
-        elementPath = `${options.projectPath}/${element.path}`;
+        elementPath = `${options.project}/${element.path}`;
         relativePath = buildRelativePath(modulePath, elementPath);
         classifiedName = strings.classify(`${element.name}`);
         declarationChanges = addDeclarationToModule(
@@ -315,7 +290,7 @@ export function addDeclarationToNgModule(host: Tree, options: OptionsI, elements
         if (element.path.charAt(0) === '@') {
           relativePath = element.path;
         } else {
-          elementPath = `${options.projectPath}/${element.path}`;
+          elementPath = `${options.project}/${element.path}`;
           relativePath = buildRelativePath(modulePath, elementPath);
         }
         classifiedName = strings.classify(`${element.name}`);
@@ -368,40 +343,29 @@ export function addDeclarationToNgModule(host: Tree, options: OptionsI, elements
   * @param options
   * @return a updated file all nodes of kind, or [] if none is found
 */
-export function addRoutes(host: Tree, srcFile: string, routersPath: routerPathI[], fileImport: string): Rule {
+export function addRoutes(host: Tree, routingPath: string, routePaths: routerPathI[], srcImport: string): Rule {
   return (hostP: Tree = host) => {
 
-    const filePath = srcFile;
 
     // Add routes to routing
     let toAdd = ''
-    routersPath.forEach(data => {
+    routePaths.forEach(data => {
       toAdd = toAdd + `{
         path:'${data.path}', pathMatch: '${data.pathMatch}', component: ${data.component}}, `
     });
 
-    const component = getFileContent(hostP, filePath);
-    hostP.overwrite(filePath, component.replace(`const routes: Routes = [`, `const routes: Routes = [${toAdd}`));
+    const component = getFileContent(hostP, routingPath);
+    hostP.overwrite(routingPath, component.replace(`const routes: Routes = [`, `const routes: Routes = [${toAdd}`));
 
     // Add import to routing
     const content =
       `
-${fileImport}`;
+${srcImport}`;
 
-    appendToStartFile(hostP, filePath, content);
+    appendToStartFile(hostP, routingPath, content);
     return hostP;
   };
 }
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Add Import `import { symbolName } from fileName` if the import doesn't exit 
@@ -412,7 +376,7 @@ ${fileImport}`;
  * @param isDefault (if true, import follows style for importing default exports)
  * @return Change
  */
-export function insertImport(source: ts.SourceFile, fileToEdit: string, symbolName: string,
+function insertImport(source: ts.SourceFile, fileToEdit: string, symbolName: string,
   fileName: string, isDefault = false): Change {
   const rootNode = source;
   const allImports = findNodes(rootNode, ts.SyntaxKind.ImportDeclaration);
@@ -490,7 +454,7 @@ export function insertImport(source: ts.SourceFile, fileToEdit: string, symbolNa
  * the last child even when node of kind has been found.
  * @return all nodes of kind, or [] if none is found
  */
-export function findNodes(node: ts.Node, kind: ts.SyntaxKind, max = Infinity, recursive = false): ts.Node[] {
+function findNodes(node: ts.Node, kind: ts.SyntaxKind, max = Infinity, recursive = false): ts.Node[] {
   if (!node || max == 0) {
     return [];
   }
@@ -523,7 +487,7 @@ export function findNodes(node: ts.Node, kind: ts.SyntaxKind, max = Infinity, re
  * @param sourceFile The source file object.
  * @returns {Observable<ts.Node>} An observable of all the nodes in the source.
  */
-export function getSourceNodes(sourceFile: ts.SourceFile): ts.Node[] {
+function getSourceNodes(sourceFile: ts.SourceFile): ts.Node[] {
   const nodes: ts.Node[] = [sourceFile];
   const result: ts.Node[] = [];
 
@@ -541,7 +505,7 @@ export function getSourceNodes(sourceFile: ts.SourceFile): ts.Node[] {
   return result;
 }
 
-export function findNode(node: ts.Node, kind: ts.SyntaxKind, text: string): ts.Node | null {
+function findNode(node: ts.Node, kind: ts.SyntaxKind, text: string): ts.Node | null {
   if (node.kind === kind && node.getText() === text) {
     // throw new Error(node.getText());
     return node;
@@ -576,7 +540,7 @@ function nodesByPosition(first: ts.Node, second: ts.Node): number {
  * @return Change instance
  * @throw Error if toInsert is first occurence but fall back is not set
  */
-export function insertAfterLastOccurrence(nodes: ts.Node[],
+function insertAfterLastOccurrence(nodes: ts.Node[],
   toInsert: string,
   file: string,
   fallbackPos: number,
@@ -646,7 +610,7 @@ function _angularImportsFromNode(node: ts.ImportDeclaration,
   }
 }
 
-export function getDecoratorMetadata(source: ts.SourceFile, identifier: string,
+function getDecoratorMetadata(source: ts.SourceFile, identifier: string,
   module: string): ts.Node[] {
   const angularImports: { [name: string]: string }
     = findNodes(source, ts.SyntaxKind.ImportDeclaration)
@@ -691,7 +655,7 @@ export function getDecoratorMetadata(source: ts.SourceFile, identifier: string,
     .map(expr => expr.arguments[0] as ts.ObjectLiteralExpression);
 }
 
-export function getMetadataField(
+function getMetadataField(
   node: ts.ObjectLiteralExpression,
   metadataField: string,
 ): ts.ObjectLiteralElement[] {
@@ -705,7 +669,7 @@ export function getMetadataField(
     });
 }
 
-export function addSymbolToNgModuleMetadata(
+function addSymbolToNgModuleMetadata(
   source: ts.SourceFile,
   ngModulePath: string,
   metadataField: string,
@@ -836,7 +800,7 @@ export function addSymbolToNgModuleMetadata(
  * Custom function to insert a declaration (component, pipe, directive)
  * into NgModule declarations. It also imports the component.
  */
-export function addDeclarationToModule(source: ts.SourceFile,
+function addDeclarationToModule(source: ts.SourceFile,
   modulePath: string, classifiedName: string,
   importPath: string): Change[] {
   return addSymbolToNgModuleMetadata(
@@ -846,7 +810,7 @@ export function addDeclarationToModule(source: ts.SourceFile,
 /**
  * Custom function to insert an NgModule into NgModule imports. It also imports the module.
  */
-export function addImportToModule(source: ts.SourceFile,
+function addImportToModule(source: ts.SourceFile,
   modulePath: string, classifiedName: string,
   importPath: string): Change[] {
 
@@ -879,7 +843,7 @@ export function addEntryComponentToModule(source: ts.SourceFile,
  * Custom function to insert an entryComponent into NgModule. It also imports it.
  * @deprecated - Since version 9.0.0 with Ivy, entryComponents is no longer necessary.
  */
-export function addProviderToModule(source: ts.SourceFile,
+function addProviderToModule(source: ts.SourceFile,
   modulePath: string, classifiedName: string,
   importPath: string): Change[] {
   return addSymbolToNgModuleMetadata(
@@ -888,7 +852,7 @@ export function addProviderToModule(source: ts.SourceFile,
   );
 }
 
-export function findBootstrapModuleCall(host: Tree, mainPath: string): ts.CallExpression | null {
+function findBootstrapModuleCall(host: Tree, mainPath: string): ts.CallExpression | null {
   const mainBuffer = host.read(mainPath);
   if (!mainBuffer) {
     throw new SchematicsException(`Main file (${mainPath}) not found`);
@@ -923,7 +887,7 @@ export function findBootstrapModuleCall(host: Tree, mainPath: string): ts.CallEx
   return bootstrapCall;
 }
 
-export function findBootstrapModulePath(host: Tree, mainPath: string): string {
+function findBootstrapModulePath(host: Tree, mainPath: string): string {
   const bootstrapCall = findBootstrapModuleCall(host, mainPath);
   if (!bootstrapCall) {
     throw new SchematicsException('Bootstrap call not found');
@@ -960,15 +924,12 @@ export function getAppModulePath(host: Tree, mainPath: string): string {
   return modulePath;
 }
 
-
-
-
-export function readConfig(host: Tree) {
+function readConfig(host: Tree) {
   const sourceText = host.read(CONFIG_PATH)!.toString('utf-8');
   return JSON.parse(sourceText);
 }
 
-export function writeConfig(host: Tree, config: JSON) {
+function writeConfig(host: Tree, config: JSON) {
   host.overwrite(CONFIG_PATH, JSON.stringify(config, null, 2));
 }
 
@@ -984,7 +945,7 @@ export function getAppName(config: any): string | null {
   return null;
 }
 
-function isAngularBrowserProject(projectConfig: any) {
+export function isAngularBrowserProject(projectConfig: any) {
   if (projectConfig.projectType === 'application') {
     const buildConfig = projectConfig.architect.build;
     return buildConfig.builder === '@angular-devkit/build-angular:browser';
@@ -992,7 +953,7 @@ function isAngularBrowserProject(projectConfig: any) {
   return false;
 }
 
-function getAngularAppConfig(config: any): any | null {
+export function getAngularAppConfig(config: any): any | null {
   const projects = config.projects;
   const projectNames = Object.keys(projects);
   for (let projectName of projectNames) {
@@ -1004,7 +965,7 @@ function getAngularAppConfig(config: any): any | null {
   return null;
 }
 
-export function addStyle(host: Tree, stylePath: string) {
+function addStyle(host: Tree, stylePath: string) {
   const config = readConfig(host);
   const appConfig = getAngularAppConfig(config);
   if (appConfig) {
@@ -1026,12 +987,12 @@ export function hasBootstrap(host: Tree): boolean {
     if (styles) {
       for (let style in styles) {
         if (styles[style].input && typeof (styles[style].input) === "string") {
-          if (styles[style].input.includes('bootstrap')) {
+          if (styles[style].input.includes('bootstrap.css')) {
             console.log("Bootstrap is already used.");
             _hasBootstrap = true;
           }
         } else if (styles[style] && typeof (styles[style]) === "string") {
-          if (styles[style].includes('bootstrap')) {
+          if (styles[style].includes('bootstrap.css')) {
             console.log("Bootstrap is already used.");
             _hasBootstrap = true;
           }
@@ -1044,7 +1005,6 @@ export function hasBootstrap(host: Tree): boolean {
     return false;
   }
 }
-
 
 /**
  * Adds a package to the package.json
@@ -1068,4 +1028,21 @@ export function getAppNameFromPackageJSON(host: Tree): string {
   const sourceText = host.read('package.json')!.toString('utf-8');
   const json = JSON.parse(sourceText);
   return json.name;
+}
+
+/**
+ * Appends a key: value on a specific environment file 
+ * @param host Tree
+ * @param env The environment to be added (example: prod, staging...)
+ * @param appPath application path (/src...)
+ * @param key The key to be added
+ * @param value The value to be added
+ * @return void
+*/
+export function addEnvironmentVar(host: Tree, env: string, appPath: string, key: string, value: string): void {
+  const environmentFilePath = `${appPath}/environments/environment${(env) ? '.' + env : ''}.ts`;
+  const sourceFile = getFileContent(host, environmentFilePath);
+  const keyValue = `
+  ${key}: '${value}',`;
+  host.overwrite(environmentFilePath, sourceFile.replace('export const environment = {', `export const environment = {${keyValue}`));
 }
