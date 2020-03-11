@@ -6,14 +6,14 @@
 To learn more about Schematics we recomend you to see the [Schematic documentation](https://angular.io/guide/schematics).
 
 
-## How to install 🔍❓ 
+## How to install❓ 
 To Install using npm, simply do:
 
 ```
 npm install cap-utils
 ```
 
-## How to Use 🔍❓
+## How to Use❓
 To import all the functions we recommend you the following import declaration: 
 
 ```
@@ -49,105 +49,112 @@ This repository contains parts of code which is directly taken from [Angular Sch
 All credits go to the respective developers! 
 
 ## Functions 📂
-### ``removeContentFromFile``
+### removeContentFromFile
 
 #### Remove content from specified file
 
-##### ``@param host``
-##### ``@param filePath`` Path of the file that's going to be deleted.
+##### _@param host_
+##### _@param filePath_ Path of the file that's going to be deleted.
 
-##### ``@return`` The updated tree.
+##### _@return_ The updated tree.
 
  
-#### Example: 
+#### Example:
 ```
 function removeComponentHtml(filePath: string): Rule {
-  return (host: Tree) => {
+  return (hostd: Tree) => {
     astUtils.removeContentFromFile(host, filePath);
     return host;
   };
 }
 ```
+<br>
 
-### ``appendToStartFile``
+### appendToStartFile
 
 #### Appends a fragment to the start file. 
-##### ``@param host``
-##### ``@param filePath`` Path of the file.
-##### ``@param fragment`` The maximum number of items to return.
-##### ``@return`` A tree with the updates.
+##### _@param host_
+##### _@param filePath_ Path of the file.
+##### _@param fragment_ The maximum number of items to return.
+##### _@return_ A tree with the updates.
 
 #### Example: 
   ```
   ```
+<br>
 
-### ``appendHtmlElementToBody``
+### appendHtmlElementToBody
 
 #### Appends the given element HTML fragment to the `<body>` element of the specified HTML file.
-##### ``@param host``
-##### ``@param htmlFilePath`` 
-##### ``@param elementHtml``
-##### ``@param side`` 
-##### ``@return `` 
+##### _@param host_
+##### _@param htmlFilePath_ 
+##### _@param elementHtml_
+##### _@param side_ 
+##### _@return_  
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addBodyClass``
+### addBodyClass
 
 #### Adds a class to the body of the document.
-##### ``@param host``
-##### ``@param htmlFilePath`` 
-##### ``@param className`` 
-##### ``@return`` 
+##### _@param host_
+##### _@param htmlFilePath_
+##### _@param className_
+##### _@return_ 
   
 #### Example: 
   ```
   ```
+<br>
 
-### ``updateBodyOfIndexFile``
+### updateBodyOfIndexFile
 
 #### 
-##### ``@param ``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param_ 
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``updateIndexFile``
+### updateIndexFile
 
 #### 
-##### ``@param ``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param_ 
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addStyles``
+### addStyles
 
 #### addBootstrapCSS
-##### ``@param host``
-##### ``@param stylePaths`` 
-##### ``@return`` 
+##### _@param host_
+##### _@param stylePaths_
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addToNgModule``
+### addToNgModule
 
 #### Add the a modules, components or services into the declaration module.
-##### ``@param host``
-##### ``@param options`` 
-##### ``@param elementsToImport`` 
-##### ``@return`` 
+##### _@param host_
+##### _@param options_
+##### _@param elementsToImport_
+##### _@return_ 
 
 #### Example: 
   ```
@@ -167,158 +174,172 @@ function removeComponentHtml(filePath: string): Rule {
       type: 'module'
     }]);
   ```
+<br>
 
-### ``addRoutes``
+### addRoutes
 
 #### 
-##### ``@param host``
-##### ``@param routingPath`` 
-##### ``@param routePaths``
-##### ``@param srcImport`` 
-##### ``@return`` 
+##### _@param host_
+##### _@param routingPath_ 
+##### _@param routePaths_
+##### _@param srcImport _
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addExportToModule``
+### addExportToModule
 
 #### Custom function to insert an export into NgModule. It also imports it.
-##### ``@param source``
-##### ``@param modulePath`` 
-##### ``@param classifiedName`` 
-##### ``@param importPath`` 
-##### ``@return`` 
+##### _@param source_
+##### _@param modulePath_ 
+##### _@param classifiedName_ 
+##### _@param importPath_ 
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addEntryComponentToModule``
+### addEntryComponentToModule
 
 #### Custom function to insert an entryComponent into NgModule. It also imports it.
-##### ``@param source``
-##### ``@param modulePath`` 
-##### ``@param classifiedName`` 
-##### ``@param importPath`` 
-##### ``@return`` 
+##### _@param source_
+##### _@param modulePath_
+##### _@param classifiedName_
+##### _@param importPath_
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``getAppModulePath``
+### getAppModulePath
 
 #### 
-##### ``@param host``
-##### ``@param mainPath`` 
-##### ``@return`` 
+##### _@param host_
+##### _@param mainPath_ 
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``getAppName``
+### getAppName
 
 #### 
-##### ``@param config``
-##### ``@return`` 
+##### _@param config_
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``hasBootstrap``
+### hasBootstrap
 
 #### 
-##### ``@param ``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param_ 
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addPackageToPackageJson``
+### addPackageToPackageJson
 
 #### 
-##### ``@param ``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param_ 
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``getAppNameFromPackageJSON``
+### getAppNameFromPackageJSON
 
 #### 
-##### ``@param ``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param_ 
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``addEnvironmentVar``
+### addEnvironmentVar
 #### Appends a key: value on a specific environment file.
-##### ``@param host`` Tree
-##### ``@param env`` The environment to be added (example: prod, staging...)
-##### ``@param appPath`` application path (/src...)
-##### ``@param key`` The key to be added
-##### ``@param value`` The value to be added
-##### ``@return void`` 
+##### _@param host_ Tree
+##### _@param env_ The environment to be added (example: prod, staging...)
+##### _@param appPath_ application path (/src...)
+##### _@param key_ The key to be added
+##### _@param value_ The value to be added
+##### _@return void_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``readIntoSourceFile``
+### readIntoSourceFile
 
 #### 
-##### ``@param ``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param_ 
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``isAngularBrowserProject``
+### isAngularBrowserProject
 
 #### 
-##### ``@param projectConfig``
-##### ``@param `` 
-##### ``@param `` 
-##### ``@return`` 
+##### _@param projectConfig_
+##### _@param_  
+##### _@param_  
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``getAngularAppConfig``
+### getAngularAppConfig
 
 #### 
-##### ``@param config``
-##### ``@return`` 
+##### _@param config_
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
 
-### ``updateIndexHeadFile``
+### updateIndexHeadFile
 
 #### Appends the given element HTML fragment to the `<head>` element of the specified HTML file.
-##### ``@param hostP``
-##### ``@param path`` 
-##### ``@param arrayLinks`` 
-##### ``@return`` 
+##### _@param hostP_
+##### _@param path_
+##### _@param arrayLinks_
+##### _@return_ 
  
 #### Example: 
   ```
   ```
+<br>
