@@ -1,6 +1,6 @@
 {
   "name": "cap-utilities",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,8 @@
   "keywords": [
     "CAP-Utilities",
     "AST",
-    "Angular"
+    "Angular",
+    "Schematics"
   ],
   "author": "Software Allies",
   "license": "ISC",

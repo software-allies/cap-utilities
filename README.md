@@ -50,6 +50,9 @@ import * as astUtils from 'cap-utilities'
 This repository contains parts of code which is directly taken from [Angular Schematics package](https://github.com/angular/angular-cli/tree/master/packages/schematics/angular).
 All credits go to the respective developers! 
 
+## **Importan**
+## **We are still working on the documentation of the functions (methods).**
+
 ## Functions 📂
 
 <br>
@@ -61,8 +64,6 @@ All credits go to the respective developers!
 ##### _@param host_
 
 ##### _@param stylePaths_
-
-##### _@return_ 
 
 #### Example: 
 
@@ -93,10 +94,10 @@ All credits go to the respective developers!
 #### Example: 
 
 ``` 
- astUtils.addRoutes(host, filePath, [
-      { path: '', pathMatch: 'full', component: 'HomeComponent' },
-      { path: 'home', pathMatch: 'full', component: 'HomeComponent' }
-    ], importUrl)
+astUtils.addRoutes(host, filePath, [
+  { path: '', pathMatch: 'full', component: 'HomeComponent' },
+  { path: 'home', pathMatch: 'full', component: 'HomeComponent' }
+], importUrl)
 ```
 
 <br>
@@ -139,8 +140,9 @@ All credits go to the respective developers!
 #### Example: 
 
 ``` 
- astUtils.addEnvironmentVar(host, '', options.projectPath || '/src', 'apiUrl', 'http://localhost:4000/api/');
-    astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl', 'http://mydomain.com/api/');
+astUtils.addEnvironmentVar(host, '', options.projectPath || '/src', 'apiUrl', 'http://localhost:4000/api/');
+
+astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl', 'http://mydomain.com/api/');
 ```
 
 <br>

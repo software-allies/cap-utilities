@@ -942,7 +942,7 @@ export function getAppName(config: any): string | null {
       return projectName;
     }
   }
-  return null;
+  return '';
 }
 
 export function isAngularBrowserProject(projectConfig: any) {
