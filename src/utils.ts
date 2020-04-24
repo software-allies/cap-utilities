@@ -258,9 +258,10 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
   // Import Header Component and declare
 
   elementsToImport.forEach(element => {
+    console.log('element: ', element.type);
 
     switch (element.type.toUpperCase()) {
-      case 'COMPONENT' || 'DIRECTIVE':
+      case 'COMPONENT':
 
         source = source = readIntoSourceFile(host, modulePath);
         resetValuesImports();
@@ -933,13 +934,13 @@ function writeConfig(host: Tree, config: JSON) {
   host.overwrite(CONFIG_PATH, JSON.stringify(config, null, 2));
 }
 
-export function getAppName(config: any): string | null {
+export function getAppName(config: any): string {
   const projects = config.projects;
   const projectNames = Object.keys(projects);
   for (let projectName of projectNames) {
     const projectConfig = projects[projectName];
     if (isAngularBrowserProject(projectConfig)) {
-      return projectName;
+      return 'projectName.toString()';
     }
   }
   return '';

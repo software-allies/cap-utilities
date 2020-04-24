@@ -1,9 +1,9 @@
 # CAP Utilities 💡
-[![NPM version](https://badge.fury.io/js/CAP.svg)](https://npmjs.org/package/CAP) [![Build Status](https://travis-ci.org/Elena%20M.%20Sarabia/CAP.svg?branch=master)](https://travis-ci.org/Elena%20M.%20Sarabia/CAP) [![Generic badge](https://img.shields.io/badge/CAP-Active-<COLOR>.svg)](https://shields.io/)
+[![NPM version](https://badge.fury.io/js/CAP.svg)](https://npmjs.org/package/CAP) [![Build Status](https://travis-ci.org/Elena%20M. %20Sarabia/CAP. svg?branch=master)](https://travis-ci.org/Elena%20M. %20Sarabia/CAP) [![Generic badge](https://img.shields.io/badge/CAP-Active-<COLOR>. svg)](https://shields.io/)
 
-` `CAP Utilities` ` is part of the [CAP Generator](https://github.com/software-allies/cap-generator/tree/development) and was created to provider a collection of general and useful utilities for Schematics in Angular.
+` ` CAP Utilities ` ` is part of the [CAP Generator](https://github.com/software-allies/cap-generator/tree/development) and was created to provider a collection of general and useful utilities for Schematics in Angular. 
 
-To learn more about Schematics we recomend you to see the [Schematic documentation](https://angular.io/guide/schematics).
+To learn more about Schematics we recomend you to see the [Schematic documentation](https://angular.io/guide/schematics). 
 
 ## How to install❓ 
 
@@ -47,11 +47,12 @@ import * as astUtils from 'cap-utilities'
 
 ## Disclaimer 🚧
 
-This repository contains parts of code which is directly taken from [Angular Schematics package](https://github.com/angular/angular-cli/tree/master/packages/schematics/angular).
+This repository contains parts of code which is directly taken from [Angular Schematics package](https://github.com/angular/angular-cli/tree/master/packages/schematics/angular). 
 All credits go to the respective developers! 
 
 ## **Importan**
-## **We are still working on the documentation of the functions (methods).**
+
+## **We are still working on the documentation of the functions (methods). **
 
 ## Functions 📂
 
@@ -61,11 +62,12 @@ All credits go to the respective developers!
 
 #### addBootstrapCSS
 
-##### _@param host_
-
-##### _@param stylePaths_
-
 #### Example: 
+
+| param       |      Description      |
+|-------------|:---------------------:|
+| host        |                       |
+| stylePaths  |                       |
 
 ``` 
   astUtils.addStyles(host, 
@@ -79,17 +81,15 @@ All credits go to the respective developers!
 
 ### addRoutes
 
-#### 
-
-##### _@param host_
-
-##### _@param routingPath_ 
-
-##### _@param routePaths_
-
-##### _@param srcImport _
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| routingPath  |                       |
+| routePaths   |                       |
+| srcImport    |                       |
 
 ##### _@return_ 
+
 
 #### Example: 
 
@@ -104,13 +104,14 @@ astUtils.addRoutes(host, filePath, [
 
 ### addBodyClass
 
-#### Adds a class to the body of the document.
+#### Adds a class to the body of the document. 
 
-##### _@param host_
-
-##### _@param htmlFilePath_
-
-##### _@param className_
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| htmlFilePath |                       |
+| className    |                       |
+| srcImport    |                       |
 
 ##### _@return_ 
 
@@ -125,18 +126,17 @@ astUtils.addRoutes(host, filePath, [
 
 #### Appends a key: value on a specific environment file.
 
-##### _@param host_ Tree
-
-##### _@param env_ The environment to be added (example: prod, staging...)
-
-##### _@param appPath_ application path (/src...)
-
-##### _@param key_ The key to be added
-
-##### _@param value_ The value to be added
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |         Tree          |
+| env          | The environment to be added (example: prod, staging...) |
+| appPath      |application path (/src...)|
+| key          |The key to be added|
+| value          |The value to be added|
 
 ##### _@return void_ 
  
+
 #### Example: 
 
 ``` 
@@ -149,20 +149,20 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 ### addExportToModule
 
-#### Custom function to insert an export into NgModule. It also imports it.
+#### Custom function to insert an export into NgModule. It also imports it. 
 
-##### _@param source_
-
-##### _@param modulePath_ 
-
-##### _@param classifiedName_ 
-
-##### _@param importPath_ 
+| param        |      Description      |
+|--------------|:---------------------:|
+| source            |                       |
+| modulePath        |                       |
+| classifiedName    |                       |
+| importPath    |                       |
 
 ##### _@return_ 
 
 #### Example: 
   
+
 ``` 
 ```
 
@@ -172,13 +172,12 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### Custom function to insert an entryComponent into NgModule. It also imports it.
 
-##### _@param source_
-
-##### _@param modulePath_
-
-##### _@param classifiedName_
-
-##### _@param importPath_
+| param        |      Description      |
+|--------------|:---------------------:|
+| source         |                       |
+| modulePath |                       |
+| classifiedName    |                       |
+| importPath    |                       |
 
 ##### _@return_ 
 
@@ -193,14 +192,13 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param_ 
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+|          |                       |
 
 ##### _@return_ 
  
+
 #### Example: 
 
 ``` 
@@ -212,11 +210,11 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### Add modules, components or services into the declaration module.
 
-##### _@param host_
-
-##### _@param options_
-
-##### _@param elementsToImport_
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| options |                       |
+| elementsToImport    |                       |
 
 ##### _@return_ 
 
@@ -244,15 +242,16 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 ### appendToStartFile
 
-#### Appends a fragment to the start file.
+#### Appends a fragment to the start file. 
 
-##### _@param host_
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| filePath |Path of the file.|
+| fragment    |The maximum number of items to return.|
+| srcImport    |                       |
 
-##### _@param filePath_ Path of the file.
-
-##### _@param fragment_ The maximum number of items to return.
-
-##### _@return_ A tree with the updates.
+##### _@return_ A tree with the updates. 
 
 #### Example: 
 
@@ -263,7 +262,7 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
   </div>`;
   astUtils.appendToStartFile(host, filePath, mainDiv);
     
-  const content = `<app-header></app-header>`;
+  const content = `<app-header></app-header>` ;
   astUtils.appendToStartFile(host, filePath, content);
 ```
 
@@ -271,15 +270,14 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 ### appendHtmlElementToBody
 
-#### Appends the given element HTML fragment to the `<body>` element of the specified HTML file.
+#### Appends the given element HTML fragment to the `<body>` element of the specified HTML file. 
 
-##### _@param host_
-
-##### _@param htmlFilePath_ 
-
-##### _@param elementHtml_
-
-##### _@param side_ 
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| htmlFilePath |                       |
+| elementHtml    |                       |
+| side    |                       |
 
 ##### _@return_  
 
@@ -294,7 +292,9 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param config_
+| param        |      Description      |
+|--------------|:---------------------:|
+| config         |                       |
 
 ##### _@return_ 
  
@@ -310,9 +310,10 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param host_
-
-##### _@param mainPath_ 
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| mainPath |                       |
 
 ##### _@return_ 
 
@@ -327,7 +328,9 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param config_
+| param        |      Description      |
+|--------------|:---------------------:|
+| config         |                       |
 
 ##### _@return_ 
 
@@ -342,11 +345,9 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param_ 
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+|          |                       |
 
 ##### _@return_ 
 
@@ -361,11 +362,9 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param_ 
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+|              |                       |
 
 ##### _@return_ 
 
@@ -380,14 +379,13 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param projectConfig_
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+| projectConfig         |               |       
 
 ##### _@return_ 
  
+
 #### Example: 
 
 ``` 
@@ -399,11 +397,9 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### 
 
-##### _@param_ 
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+|          |                       |
 
 ##### _@return_ 
 
@@ -418,11 +414,12 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 #### Remove content from specified file
 
-##### _@param host_
+| param        |      Description      |
+|--------------|:---------------------:|
+| host         |                       |
+| filePath |Path of the file that's going to be deleted.|
 
-##### _@param filePath_ Path of the file that's going to be deleted.
-
-##### _@return_ The updated tree.
+##### _@return_ The updated tree. 
 
 #### Example:
 
@@ -441,14 +438,13 @@ function removeComponentHtml(filePath: string): Rule {
 
 #### 
 
-##### _@param_ 
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+|          |                       |
 
 ##### _@return_ 
  
+
 #### Example: 
 
 ``` 
@@ -460,11 +456,12 @@ function removeComponentHtml(filePath: string): Rule {
 
 #### Appends the given element HTML fragment to the `<head>` element of the specified HTML file.
 
-##### _@param hostP_
 
-##### _@param path_
-
-##### _@param arrayLinks_
+| param        |      Description      |
+|--------------|:---------------------:|
+| hostP         |                       |
+| path |                       |
+| arrayLinks    |                       |
 
 ##### _@return_ 
 
@@ -479,11 +476,9 @@ function removeComponentHtml(filePath: string): Rule {
 
 #### 
 
-##### _@param_ 
-
-##### _@param_  
-
-##### _@param_  
+| param        |      Description      |
+|--------------|:---------------------:|
+|          |                       |
 
 ##### _@return_ 
 
