@@ -1,6 +1,6 @@
 {
   "name": "cap-utilities",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,8 +36,8 @@
   "dependencies": {
     "@angular/cdk": "^8.2.3",
     "@schematics/angular": "^8.3.23",
-    "cap-angular-schematic-bootstrap": "0.0.6",
     "cap-angular-schematic-authentication-forked": "0.0.6",
+    "cap-angular-schematic-bootstrap": "0.0.6",
     "schematics-utilities": "^2.0.1"
   }
 }

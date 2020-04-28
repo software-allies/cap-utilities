@@ -44,6 +44,9 @@ import * as astUtils from 'cap-utilities'
 * [updateIndexFile](#updateIndexFile)
 * [updateIndexHeadFile](#updateIndexHeadFile)
 * [updateBodyOfIndexFile](#updateBodyOfIndexFile)
+* [addIdToElement](#addIdToElement)
+
+addIdToElement
 
 ## Disclaimer 🚧
 
@@ -90,7 +93,6 @@ All credits go to the respective developers!
 
 ##### _@return_ 
 
-
 #### Example: 
 
 ``` 
@@ -135,6 +137,7 @@ astUtils.addRoutes(host, filePath, [
 | value          |The value to be added|
 
 ##### _@return void_ 
+
  
 
 #### Example: 
@@ -197,6 +200,7 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 |          |                       |
 
 ##### _@return_ 
+
  
 
 #### Example: 
@@ -247,8 +251,8 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 | param        |      Description      |
 |--------------|:---------------------:|
 | host         |                       |
-| filePath |Path of the file.|
-| fragment    |The maximum number of items to return.|
+| filePath |Path of the file. |
+| fragment    |The maximum number of items to return. |
 | srcImport    |                       |
 
 ##### _@return_ A tree with the updates. 
@@ -297,6 +301,7 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 | config         |                       |
 
 ##### _@return_ 
+
  
 
 #### Example: 
@@ -384,6 +389,7 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 | projectConfig         |               |       
 
 ##### _@return_ 
+
  
 
 #### Example: 
@@ -399,7 +405,7 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 
 | param        |      Description      |
 |--------------|:---------------------:|
-|          |                       |
+|              |                       |
 
 ##### _@return_ 
 
@@ -417,7 +423,7 @@ astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl'
 | param        |      Description      |
 |--------------|:---------------------:|
 | host         |                       |
-| filePath |Path of the file that's going to be deleted.|
+| filePath |Path of the file that's going to be deleted. |
 
 ##### _@return_ The updated tree. 
 
@@ -440,9 +446,10 @@ function removeComponentHtml(filePath: string): Rule {
 
 | param        |      Description      |
 |--------------|:---------------------:|
-|          |                       |
+|              |                       |
 
 ##### _@return_ 
+
  
 
 #### Example: 
@@ -456,12 +463,11 @@ function removeComponentHtml(filePath: string): Rule {
 
 #### Appends the given element HTML fragment to the `<head>` element of the specified HTML file.
 
-
-| param        |      Description      |
-|--------------|:---------------------:|
-| hostP         |                       |
-| path |                       |
-| arrayLinks    |                       |
+|        param        |      Description      |
+|---------------------|:---------------------:|
+| hostP               |                       |
+| path                |                       |
+| arrayLinks          |                       |
 
 ##### _@return_ 
 
@@ -478,13 +484,36 @@ function removeComponentHtml(filePath: string): Rule {
 
 | param        |      Description      |
 |--------------|:---------------------:|
-|          |                       |
+|              |                       |
 
 ##### _@return_ 
 
 #### Example: 
 
 ``` 
+```
+
+<br>
+
+### addIdToElement
+
+#### Add a id to a element on a html file
+
+| param         |      Description              |
+|---------------|:-----------------------------:|
+| host          |     Tree                      |
+| htmlFilePath  |Html file path                 |
+| idName        |Name of the id to be added     |
+| tagName       |Html tag name to append the id |
+
+#### Example: 
+
+``` 
+  function addIdAppToBody(htmlFilePath: string): Rule {
+    return (host: Tree) => {
+      addIdToElement(host, htmlFilePath, 'app', 'body');
+    }
+}*/
 ```
 
 <br>

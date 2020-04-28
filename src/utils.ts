@@ -258,15 +258,13 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
   // Import Header Component and declare
 
   elementsToImport.forEach(element => {
-    console.log('element: ', element.type);
 
     switch (element.type.toUpperCase()) {
       case 'COMPONENT':
-
         source = source = readIntoSourceFile(host, modulePath);
         resetValuesImports();
 
-        elementPath = `${options.project}/${element.path}`;
+        elementPath = `${options.path}/${element.path}`;
         relativePath = buildRelativePath(modulePath, elementPath);
         classifiedName = strings.classify(`${element.name}`);
         declarationChanges = addDeclarationToModule(
@@ -276,6 +274,7 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
           relativePath);
 
         declarationRecorder = host.beginUpdate(modulePath);
+        console.log('modulePath: ', modulePath);
         for (const change of declarationChanges) {
           if (change instanceof InsertChange) {
             declarationRecorder.insertLeft(change.pos, change.toAdd);
@@ -283,15 +282,14 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
         }
         host.commitUpdate(declarationRecorder);
         break;
-      case 'MODULE':
-
+      case 'MODULE' || 'DIRECTIVE':
         source = source = readIntoSourceFile(host, modulePath);
         resetValuesImports();
 
         if (element.path.charAt(0) === '@') {
           relativePath = element.path;
         } else {
-          elementPath = `${options.project}/${element.path}`;
+          elementPath = `${options.path}/${element.path}`;
           relativePath = buildRelativePath(modulePath, elementPath);
         }
         classifiedName = strings.classify(`${element.name}`);
@@ -315,10 +313,9 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
         source = source = readIntoSourceFile(host, modulePath);
         resetValuesImports();
         // Need to refresh the AST because we overwrote the file in the host.
-        relativePath = `../${element.path}`;
+        relativePath = `./${element.path}`;
         classifiedName = strings.classify(element.name);
         const providerRecorder = host.beginUpdate(modulePath);
-        addProviderToModule
         const providerChanges: any = addProviderToModule(
           source,
           modulePath,
@@ -1046,4 +1043,40 @@ export function addEnvironmentVar(host: Tree, env: string, appPath: string, key:
   const keyValue = `
   ${key}: '${value}',`;
   host.overwrite(environmentFilePath, sourceFile.replace('export const environment = {', `export const environment = {${keyValue}`));
+}
+
+/**
+ * Add a id to a element on a html file
+ * @param host Tree
+ * @param htmlFilePath Html file path
+ * @param idName Name of the id to be added
+ * @param tagName Html tag name to append the id
+ * @return void
+*/
+export function addIdToElement(host: Tree, htmlFilePath: string, idName: string, tagName: string): void {
+  const htmlFileBuffer = host.read(htmlFilePath);
+  if (!htmlFileBuffer) {
+    throw new SchematicsException(`Could not read file for path: ${htmlFilePath}`);
+  }
+  const htmlContent = htmlFileBuffer.toString();
+  const _element = getElementByTagName(tagName, htmlContent);
+  if (!_element) {
+    throw Error(`Could not find ${tagName} element in HTML file: ${htmlFileBuffer}`);
+  }
+  const attribute = _element.attrs.find(attribute => attribute.name === 'id');
+  if (attribute) {
+    const hasAttr = attribute.value.split(' ').map(part => part.trim()).includes(idName);
+    if (!hasAttr) {
+      const attributeLocation = _element.sourceCodeLocation!.attrs.id;
+      const recordedChange = host
+        .beginUpdate(htmlFilePath)
+        .insertRight(attributeLocation.endOffset - 1, ` ${idName}`);
+      host.commitUpdate(recordedChange);
+    }
+  } else {
+    const recordedChange = host
+      .beginUpdate(htmlFilePath)
+      .insertRight(_element.sourceCodeLocation!.startTag.endOffset - 1, ` id="${idName}"`);
+    host.commitUpdate(recordedChange);
+  }
 }
