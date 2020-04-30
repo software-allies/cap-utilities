@@ -213,10 +213,10 @@ export function updateIndexHeadFile(hostP: Tree, path: string, arrayLinks: strin
 /**
 * addBootstrapCSS.
 * @param host
-* @param stylePaths
+* @param stylePaths array of strings
 * @return all nodes of kind, or [] if none is found
 */
-export function addStyles(host: Tree, stylePaths: string[]) {
+export function addStyles(host: Tree, stylePaths: any[]) {
   stylePaths.forEach(src => {
     addStyle(host, `${src}`);
   });
