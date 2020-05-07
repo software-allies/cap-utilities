@@ -11,9 +11,8 @@ import { Rule, SchematicsException, Tree, UpdateRecorder, } from '@angular-devki
 import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
 
 //Importing interfaces
-import { OptionsI } from './interface/options';
-import { routerPathI } from './interface/router';
-import { importElementsModule } from './interface/imports';
+import { OptionsI, EnvI, routerPathI } from './interface/interfaces';
+import { importElementsModule } from './interface/interfaces';
 
 const CONFIG_PATH = 'angular.json';
 
@@ -217,9 +216,11 @@ export function updateIndexHeadFile(hostP: Tree, path: string, arrayLinks: strin
 * @return all nodes of kind, or [] if none is found
 */
 export function addStyles(host: Tree, stylePaths: any[]) {
-  stylePaths.forEach(src => {
-    addStyle(host, `${src}`);
-  });
+  if (stylePaths.length > 0) {
+    stylePaths.forEach(src => {
+      addStyle(host, `${src}`);
+    });
+  }
 }
 
 /**
@@ -1037,12 +1038,22 @@ export function getAppNameFromPackageJSON(host: Tree): string {
  * @param value The value to be added
  * @return void
 */
-export function addEnvironmentVar(host: Tree, env: string, appPath: string, key: string, value: string): void {
-  const environmentFilePath = `${appPath}/environments/environment${(env) ? '.' + env : ''}.ts`;
-  const sourceFile = getFileContent(host, environmentFilePath);
-  const keyValue = `
-  ${key}: '${value}',`;
-  host.overwrite(environmentFilePath, sourceFile.replace('export const environment = {', `export const environment = {${keyValue}`));
+export function addEnvironmentVar(host: Tree, routePaths: EnvI[]): void {
+  overwriteEnvironmets(host, routePaths);
+
+}
+
+function overwriteEnvironmets(host: Tree, routePaths: EnvI[]) {
+  if (routePaths.length > 0) {
+    routePaths.forEach(environmet => {
+      const environmentFilePath = `${environmet.appPath}/environments/environment${(environmet.env) ? '.' + environmet.env : ''}.ts`;
+      const sourceFile = getFileContent(host, environmentFilePath);
+      const keyValue = `
+      ${environmet.key}: '${environmet.value}',`;
+      host.overwrite(environmentFilePath, sourceFile.replace('export const environment = {', `export const environment = {${keyValue}`));
+    })
+  }
+
 }
 
 /**
