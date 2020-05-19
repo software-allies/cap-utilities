@@ -1,21 +1,12 @@
 /**
  * 
-  * @param name Component name example: 'HomeComponent'
-  * @param path Component path example: app/footer/footer.component
+  * @param name Component name. Example: 'HomeComponent'
+  * @param path Component path. Example: app/footer/footer.component
   * @param type True or false in case that the element to add is not a Component
 */
 export interface importElementsModule {
-  /**
-   * name of the element
-  */
   name: string;
-  /**
-   * path of the element
-  */
   path: string;
-  /**
-   * type of the element: 'component', 'module', 'service'
-  */
   type: string;
 }
 
@@ -36,10 +27,10 @@ export interface OptionsI {
 
 /**
   * Env interface.
-  * @param env Name of your current application.
-  * @param appPath Recives a of kind, or [] if none is found
-  * @param key Path of the current project.
-  * @param value Path of the App module.
+  * @param env The environment to be added (example: prod, staging...)
+  * @param appPath application path (/src...)
+  * @param key The key to be added
+  * @param value The value to be added
 */
 export interface EnvI {
   env: string;
@@ -49,7 +40,7 @@ export interface EnvI {
 };
 
 /**
-  * Option interface.
+  * Imports for the ngModule interface.
   * @param path Name of your current application.
   * @param pathMatch URL of your logo. 
   * @param component True or False to remove the content from the app.component.html.
