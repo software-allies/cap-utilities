@@ -1,5 +1,5 @@
 # CAP Utilities 💡
-[![NPM version](https://badge.fury.io/js/cap-utilities.svg)](https://www.npmjs.com/package/cap-utilities)[![Generic badge](https://img.shields.io/badge/CAP-Active-<COLOR>. svg)](https://shields.io/)
+[![NPM version](https://badge.fury.io/js/cap-utilities.svg)](https://www.npmjs.com/package/cap-utilities)[![Generic badge](https://img.shields.io/badge/CAP-Active-<COLOR>.svg)](https://shields.io/)
 
 ` `CAP Utilities` ` is part of the [CAP Generator](https://github.com/software-allies/cap-generator/tree/development) and was created to provider a collection of general and useful utilities for Schematics in Angular. 
 
