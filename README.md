@@ -10,7 +10,7 @@ To learn more about Schematics we recomend you to see the [Schematic documentati
 To Install using npm, simply do:
 
 ``` 
-npm install cap-utils
+npm install cap-utilities
 ```
 
 ## How to Use❓
