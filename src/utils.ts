@@ -275,7 +275,6 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
           relativePath);
 
         declarationRecorder = host.beginUpdate(modulePath);
-        console.log('modulePath: ', modulePath);
         for (const change of declarationChanges) {
           if (change instanceof InsertChange) {
             declarationRecorder.insertLeft(change.pos, change.toAdd);
@@ -987,7 +986,6 @@ function addStyle(host: Tree, stylePath: string) {
     appConfig.architect.build.options.styles.push({
       input: stylePath
     });
-    console.log('appConfig: ', appConfig);
     writeConfig(host, config);
   } else {
     console.log("Can't find an app.");

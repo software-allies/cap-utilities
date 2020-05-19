@@ -553,3 +553,7 @@ function removeComponentHtml(filePath: string): Rule {
 ```
 
 <br>
+
+
+## License
+Apache-2.0  © [Software Allies](https://www.softwareallies.com/)
