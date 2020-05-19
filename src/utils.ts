@@ -7,7 +7,7 @@ import { buildRelativePath } from '@schematics/angular/utility/find-module';
 import { appendHtmlElementToHead } from '@angular/cdk/schematics/utils/html-head-element';
 import { getChildElementIndentation } from '@angular/cdk/schematics/utils/parse5-element';
 import { InsertChange, Change, NoopChange } from '@schematics/angular/utility/change';
-import { Rule, SchematicsException, Tree, UpdateRecorder, } from '@angular-devkit/schematics';
+import { Rule, SchematicsException, Tree, UpdateRecorder } from '@angular-devkit/schematics';
 import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
 
 //Importing interfaces
@@ -210,14 +210,14 @@ export function updateIndexHeadFile(hostP: Tree, path: string, arrayLinks: strin
 }
 
 /**
-* addBootstrapCSS.
+* Function to add styles into the angular.json.
 * @param host
 * @param stylePaths array of strings
 * @return all nodes of kind, or [] if none is found
 */
-export function addStyles(host: Tree, stylePaths: any[]) {
+export function addStylesToAngularJSON(host: Tree, stylePaths: any[]) {
   if (stylePaths.length > 0) {
-    stylePaths.forEach(src => {
+    return stylePaths.map(src => {
       addStyle(host, `${src}`);
     });
   }
@@ -901,6 +901,7 @@ function findBootstrapModulePath(host: Tree, mainPath: string): string {
   const mainText = mainBuffer.toString('utf-8');
   const source = ts.createSourceFile(mainPath, mainText, ts.ScriptTarget.Latest, true);
   const allNodes = getSourceNodes(source);
+
   const bootstrapModuleRelativePath = allNodes
     .filter(node => node.kind === ts.SyntaxKind.ImportDeclaration)
     .filter(imp => {
@@ -964,6 +965,21 @@ export function getAngularAppConfig(config: any): any | null {
   return null;
 }
 
+/**
+ * Insert an html link on the head of and html file
+ *
+ * @param host host.
+ * @param linkHTMLTags Recibes an array of strings.
+ * @param path String
+ */
+export function addLinkStyleToHTMLHead(host: Tree, linkHTMLTags: string[], path: any) {
+  if(linkHTMLTags.length > 0){
+    linkHTMLTags.map((linkTag: string) => {
+      appendHtmlElementToHead(host, path, linkTag);
+    })
+  }
+}
+
 function addStyle(host: Tree, stylePath: string) {
   const config = readConfig(host);
   const appConfig = getAngularAppConfig(config);
@@ -971,6 +987,7 @@ function addStyle(host: Tree, stylePath: string) {
     appConfig.architect.build.options.styles.push({
       input: stylePath
     });
+    console.log('appConfig: ', appConfig);
     writeConfig(host, config);
   } else {
     console.log("Can't find an app.");
@@ -1032,6 +1049,7 @@ export function getAppNameFromPackageJSON(host: Tree): string {
 /**
  * Appends a key: value on a specific environment file 
  * @param host Tree
+  *@param routePaths An array of the environments routes
  * @param env The environment to be added (example: prod, staging...)
  * @param appPath application path (/src...)
  * @param key The key to be added
@@ -1043,17 +1061,24 @@ export function addEnvironmentVar(host: Tree, routePaths: EnvI[]): void {
 
 }
 
+function writeEnvironmets(host: Tree, environment: any) {
+  const environmentFilePath = `${environment.appPath}/environments/environment${(environment.env) ? '.' + environment.env : ''}.ts`;
+  const sourceFile = getFileContent(host, environmentFilePath);
+  const keyValue = `
+  ${environment.key}: '${environment.value}',`;
+  host.overwrite(environmentFilePath, sourceFile.replace('export const environment = {', `export const environment = {${keyValue}`));
+}
+
 function overwriteEnvironmets(host: Tree, routePaths: EnvI[]) {
   if (routePaths.length > 0) {
-    routePaths.forEach(environmet => {
-      const environmentFilePath = `${environmet.appPath}/environments/environment${(environmet.env) ? '.' + environmet.env : ''}.ts`;
-      const sourceFile = getFileContent(host, environmentFilePath);
-      const keyValue = `
-      ${environmet.key}: '${environmet.value}',`;
-      host.overwrite(environmentFilePath, sourceFile.replace('export const environment = {', `export const environment = {${keyValue}`));
-    })
+    if (routePaths.length === 1) {
+      writeEnvironmets(host, routePaths[0]);
+    } else {
+      routePaths.forEach((environment: any) => {
+        writeEnvironmets(host, environment);
+      })
+    }
   }
-
 }
 
 /**
