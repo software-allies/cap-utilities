@@ -1,7 +1,7 @@
 # CAP Utilities 💡
-[![NPM version](https://badge.fury.io/js/CAP.svg)](https://npmjs.org/package/CAP) [![Build Status](https://travis-ci.org/Elena%20M. %20Sarabia/CAP. svg?branch=master)](https://travis-ci.org/Elena%20M. %20Sarabia/CAP) [![Generic badge](https://img.shields.io/badge/CAP-Active-<COLOR>. svg)](https://shields.io/)
+[![NPM version](https://badge.fury.io/js/cap-utilities.svg)](https://www.npmjs.com/package/cap-utilities)[![Generic badge](https://img.shields.io/badge/CAP-Active-<COLOR>. svg)](https://shields.io/)
 
-` ` CAP Utilities ` ` is part of the [CAP Generator](https://github.com/software-allies/cap-generator/tree/development) and was created to provider a collection of general and useful utilities for Schematics in Angular. 
+` `CAP Utilities` ` is part of the [CAP Generator](https://github.com/software-allies/cap-generator/tree/development) and was created to provider a collection of general and useful utilities for Schematics in Angular. 
 
 To learn more about Schematics we recomend you to see the [Schematic documentation](https://angular.io/guide/schematics). 
 
@@ -23,7 +23,8 @@ import * as astUtils from 'cap-utilities'
 
 ### Functions 📂 
 
-* [addStyles](#addStyles)
+* [addStylesToAngularJSON](#addStylesToAngularJSON)
+* [addLinkStyleToHTMLHead](#addLinkStyleToHTMLHead)
 * [addRoutes](#addRoutes)
 * [addBodyClass](#appendHtmlElementToBody)
 * [addEnvironmentVar](#addEnvironmentVar)
@@ -61,23 +62,44 @@ All credits go to the respective developers!
 
 <br>
 
-### addStyles
+### addStylesToAngularJSON
 
-#### addBootstrapCSS
+#### Function to add styles into the angular. json. 
 
 #### Example: 
 
 | param       |      Description      |
 |-------------|:---------------------:|
 | host        |                       |
-| stylePaths  |                       |
+| stylePaths  |        array of strings               |
 
 ``` 
-  astUtils.addStyles(host, 
-  [
-    './src/assets/webslidemenu/dropdown-effects/fade-down.css', 
-    './src/assets/webslidemenu/webslidemenu.css'
-  ]);
+  cap_utils.addStylesToAngularJSON(
+    host, [
+      './src/assets/webslidemenu/dropdown-effects/fade-down.css',
+      './src/assets/webslidemenu/webslidemenu.scss'])
+```
+
+<br>
+
+### addLinkStyleToHTMLHead
+
+#### Insert an html link on the head of and html file
+
+#### Example: 
+
+| param       |      Description      |
+|-------------|:---------------------:|
+| host        |                       |
+| linkHTMLTags  |        array of strings               |
+| path  |        string               |
+
+``` 
+  cap_utils.addLinkStyleToHTMLHead(host, [
+      '<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=optional" rel="stylesheet" async defer>',
+      '<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=optional" rel="stylesheet" async defer>',
+      '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" async defer>'
+    ], path)
 ```
 
 <br>
@@ -131,6 +153,9 @@ astUtils.addRoutes(host, filePath, [
 | param        |      Description      |
 |--------------|:---------------------:|
 | host         |         Tree          |
+| routePaths   |    An array of objects that contains the environments data.       |
+
+routePaths' interface 
 | env          | The environment to be added (example: prod, staging...) |
 | appPath      |application path (/src...)|
 | key          |The key to be added|
@@ -143,9 +168,20 @@ astUtils.addRoutes(host, filePath, [
 #### Example: 
 
 ``` 
-astUtils.addEnvironmentVar(host, '', options.projectPath || '/src', 'apiUrl', 'http://localhost:4000/api/');
-
-astUtils.addEnvironmentVar(host, 'prod', options.projectPath || '/src', 'apiUrl', 'http://mydomain.com/api/');
+cap_utils.addEnvironmentVar(host, [
+      {
+        env: '',
+        appPath: options.path || '/src',
+        key: 'apiUrl',
+        value: 'http://localhost:4000/api/'
+      },
+      {
+        env: 'prod',
+        appPath: options.path || '/src',
+        key: 'apiUrl',
+        value: 'http://mydomain.com/api/'
+      }
+    ])
 ```
 
 <br>

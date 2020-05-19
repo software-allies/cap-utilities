@@ -1,6 +1,6 @@
 {
   "name": "cap-utilities",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,8 +24,9 @@
   },
   "homepage": "https://github.com/software-allies/cap-utilities/tree/development#readme",
   "devDependencies": {
+    "@angular-devkit/build-angular": "^0.901.4",
     "@angular-devkit/core": "^7.3.9",
-    "@angular-devkit/schematics": "^7.3.9",
+    "@angular-devkit/schematics": "^7.3.10",
     "@types/jasmine": "^3.0.0",
     "@types/node": "^8.0.31",
     "@types/parse5": "^5.0.2",
