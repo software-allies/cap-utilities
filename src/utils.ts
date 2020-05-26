@@ -1,19 +1,36 @@
 import * as ts from 'typescript';
-import { strings } from '@angular-devkit/core';
 import { dirname } from 'path';
+
+import { strings } from '@angular-devkit/core';
 import { normalize } from '@angular-devkit/core';
-import { getFileContent } from '@schematics/angular/utility/test';
-import { buildRelativePath } from '@schematics/angular/utility/find-module';
+import { Rule, SchematicsException, Tree, UpdateRecorder } from '@angular-devkit/schematics';
 import { appendHtmlElementToHead } from '@angular/cdk/schematics/utils/html-head-element';
 import { getChildElementIndentation } from '@angular/cdk/schematics/utils/parse5-element';
+
+import { getFileContent } from '@schematics/angular/utility/test';
+import {
+  findModule,
+  MODULE_EXT,
+  buildRelativePath,
+  ROUTING_MODULE_EXT
+} from '@schematics/angular/utility/find-module';
+import { getWorkspace } from '@schematics/angular/utility/config';
+import { parseName } from '@schematics/angular/utility/parse-name';
 import { InsertChange, Change, NoopChange } from '@schematics/angular/utility/change';
-import { Rule, SchematicsException, Tree, UpdateRecorder } from '@angular-devkit/schematics';
+
+import { buildDefaultPath } from 'schematics-utilities';
 import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
 import { getSourceFile } from 'schematics-utilities/dist/cdk';
-//Importing interfaces
-import { OptionsI, EnvI, routerPathI, importElementsModule, forRootI, forRootValuesI } from './interface/interfaces';
 
-const CONFIG_PATH = 'angular.json';
+//Importing interfaces
+import {
+  EnvI,
+  OptionsI,
+  forRootI,
+  routerPathI,
+  forRootValuesI,
+  importElementsModule
+} from './interface/interfaces';
 
 let source;
 let elementPath;
@@ -22,6 +39,7 @@ let classifiedName;
 let declarationChanges;
 let declarationRecorder;
 
+const CONFIG_PATH = 'angular.json';
 
 /**
  * Remove content from specified file.
@@ -1117,9 +1135,10 @@ export function addIdToElement(host: Tree, htmlFilePath: string, idName: string,
   }
 }
 
-function ggizi(elements: forRootValuesI[]) {
+function addForRootValues(elements: forRootValuesI[]) {
   let forRootValue = '';
   elements.map(data => {
+    console.log('data: ', data);
     forRootValue = forRootValue + `${data.name}: '${data.value},'\n`
   });
   return forRootValue;
@@ -1129,7 +1148,6 @@ function ggizi(elements: forRootValuesI[]) {
 export function addModuleWithForRootVars(host: Tree, module: forRootI, src: any) {
   return (hostAux: Tree = host) => {
     const moduleSource = getSourceFile(host, module.path);
-
     if (!moduleSource) {
       throw new SchematicsException(`Module not found: ${module.path}`);
     }
@@ -1141,7 +1159,7 @@ export function addModuleWithForRootVars(host: Tree, module: forRootI, src: any)
       // if (change instanceof InsertChange) {
       if (change.toAdd === `,\n    ${module.name}`) {
         change.toAdd = `,\n    ${module.name}.forRoot({
-          ${ggizi(module.forRootVakues)}
+          ${addForRootValues(module.forRootVakues)}
     })
     `;
       }
@@ -1179,7 +1197,7 @@ export function root(host: Tree, options: any, module: forRootI) {
       if (change instanceof InsertChange) {
         if (change.toAdd === `,\n    ${module.name}`) {
           change.toAdd = `,\n    ${module.name}.forRoot({
-            ${ggizi(module.forRootVakues)}
+            ${addForRootValues(module.forRootVakues)}
       })
       `;
 
@@ -1191,4 +1209,43 @@ export function root(host: Tree, options: any, module: forRootI) {
     return hostAux;
   }
 
-} 
+}
+
+export function addToPolyfillsFile(host: Tree, content: string) {
+  return (tree: Tree = host) => {
+    let polifyllsPath = 'src/polyfills.ts';
+    const buffer = tree.read(polifyllsPath);
+    if (buffer === null) {
+      throw new SchematicsException('Could not find polifulls.ts');
+    }
+    const polyfil: string = JSON.parse(JSON.stringify(buffer.toString()));
+    let polifyllContent = polyfil;
+    polifyllContent = polyfil + `\n\n ${content} \n\n`;
+    tree.overwrite(polifyllsPath, polifyllContent);
+    return tree;
+  }
+}
+
+export function setupOptions(host: Tree, options: any) {
+  const workspace = getWorkspace(host);
+  if (!options.project) {
+    options.project = Object.keys(workspace.projects)[0];
+  }
+  const project: any = workspace.projects[options.project];
+
+  if (options.path === undefined) {
+    options.path = buildDefaultPath(project);
+  }
+  
+  options.module = findModule(host, options.path, 'app' + MODULE_EXT, ROUTING_MODULE_EXT);
+  options.name = '';
+  const parsedPath = parseName(options.path!, options.name);
+  options.name = parsedPath.name;
+  options.path = parsedPath.path;
+
+  const projectType: string = project.projectType || project.projects[options.project].projectType;
+  if (projectType !== 'application') {
+    throw new SchematicsException(`Is required a project type of "application".`);
+  }
+  return host;
+}
