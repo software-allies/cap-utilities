@@ -1,5 +1,5 @@
 /**
- * 
+  * 
   * @param name Component name. Example: 'HomeComponent'
   * @param path Component path. Example: app/footer/footer.component
   * @param type True or false in case that the element to add is not a Component
@@ -49,4 +49,21 @@ export interface routerPathI {
   path: string;
   pathMatch: string;
   component: any
+}
+
+export interface forRootValuesI {
+  name: string;
+  value: string;
+}
+
+/**
+  * Add a Module with the ForRoot method
+  * @param path Name of your current application.
+  * @param pathMatch URL of your logo. 
+  * @param component True or False to remove the content from the app.component.html.
+*/
+export interface forRootI {
+  name: string;
+  path: string;
+  forRootVakues: forRootValuesI[];
 }

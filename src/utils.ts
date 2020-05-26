@@ -9,10 +9,9 @@ import { getChildElementIndentation } from '@angular/cdk/schematics/utils/parse5
 import { InsertChange, Change, NoopChange } from '@schematics/angular/utility/change';
 import { Rule, SchematicsException, Tree, UpdateRecorder } from '@angular-devkit/schematics';
 import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
-
+import { getSourceFile } from 'schematics-utilities/dist/cdk';
 //Importing interfaces
-import { OptionsI, EnvI, routerPathI } from './interface/interfaces';
-import { importElementsModule } from './interface/interfaces';
+import { OptionsI, EnvI, routerPathI, importElementsModule, forRootI, forRootValuesI } from './interface/interfaces';
 
 const CONFIG_PATH = 'angular.json';
 
@@ -302,6 +301,9 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
         declarationRecorder = host.beginUpdate(modulePath);
         for (const change of declarationChanges) {
           if (change instanceof InsertChange) {
+            console.log('change: ', change);
+            console.log('change.pos: ', change.pos);
+            console.log('change.toAdd: ', change.toAdd);
             declarationRecorder.insertLeft(change.pos, change.toAdd);
           }
         }
@@ -972,7 +974,7 @@ export function getAngularAppConfig(config: any): any | null {
  * @param path String
  */
 export function addLinkStyleToHTMLHead(host: Tree, linkHTMLTags: string[], path: any) {
-  if(linkHTMLTags.length > 0){
+  if (linkHTMLTags.length > 0) {
     linkHTMLTags.map((linkTag: string) => {
       appendHtmlElementToHead(host, path, linkTag);
     })
@@ -1114,3 +1116,79 @@ export function addIdToElement(host: Tree, htmlFilePath: string, idName: string,
     host.commitUpdate(recordedChange);
   }
 }
+
+function ggizi(elements: forRootValuesI[]) {
+  let forRootValue = '';
+  elements.map(data => {
+    forRootValue = forRootValue + `${data.name}: '${data.value},'\n`
+  });
+  return forRootValue;
+}
+
+
+export function addModuleWithForRootVars(host: Tree, module: forRootI, src: any) {
+  return (hostAux: Tree = host) => {
+    const moduleSource = getSourceFile(host, module.path);
+
+    if (!moduleSource) {
+      throw new SchematicsException(`Module not found: ${module.path}`);
+    }
+
+    const changes = addImportToModule(moduleSource as any, module.path, module.name, src);
+    let recorder = host.beginUpdate(module.path);
+
+    changes.forEach((change: any) => {
+      // if (change instanceof InsertChange) {
+      if (change.toAdd === `,\n    ${module.name}`) {
+        change.toAdd = `,\n    ${module.name}.forRoot({
+          ${ggizi(module.forRootVakues)}
+    })
+    `;
+      }
+      recorder.insertLeft(change.pos, change.toAdd);
+
+      // }
+    });
+    host.commitUpdate(recorder);
+
+    return hostAux;
+  }
+}
+
+
+export function root(host: Tree, options: any, module: forRootI) {
+  return (hostAux: Tree = host) => {
+
+    const modulePath = module.name;
+    // Import Header Component and declare
+    source = source = readIntoSourceFile(host, modulePath);
+    resetValuesImports();
+
+    elementPath = `${options.path}/${module.path}`;
+    relativePath = buildRelativePath(modulePath, elementPath);
+
+    classifiedName = strings.classify(`${module.name}`);
+    declarationChanges = addImportToModule(
+      source,
+      modulePath,
+      classifiedName,
+      relativePath);
+
+    declarationRecorder = host.beginUpdate(modulePath);
+    for (const change of declarationChanges) {
+      if (change instanceof InsertChange) {
+        if (change.toAdd === `,\n    ${module.name}`) {
+          change.toAdd = `,\n    ${module.name}.forRoot({
+            ${ggizi(module.forRootVakues)}
+      })
+      `;
+
+        }
+        declarationRecorder.insertLeft(change.pos, change.toAdd);
+      }
+    }
+    host.commitUpdate(declarationRecorder);
+    return hostAux;
+  }
+
+} 
