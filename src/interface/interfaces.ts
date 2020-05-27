@@ -3,6 +3,7 @@
   * @param name Component name. Example: 'HomeComponent'
   * @param path Component path. Example: app/footer/footer.component
   * @param type True or false in case that the element to add is not a Component
+  * @param forRootValues Recives and array of object thats contain the name and value to add into the forRoot method.
 */
 export interface importElementsModule {
   name: string;

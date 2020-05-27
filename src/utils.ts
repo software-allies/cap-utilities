@@ -1161,6 +1161,11 @@ function addForRootValues(elements: forRootValuesI[]) {
   return forRootValue;
 }
 
+/**
+ * Add content into the polyfills file
+ * @param host Tree.
+ * @param content String to add into the polyfills file.
+*/
 export function addToPolyfillsFile(host: Tree, content: string) {
   return (tree: Tree = host) => {
     let polifyllsPath = 'src/polyfills.ts';

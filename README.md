@@ -250,6 +250,8 @@ cap_utils.addEnvironmentVar(host, [
 
 #### Add modules, components or services into the declaration module.
 
+*Note:* If you wanna include a module with the method forRoot into the app module, intance of write the path of the module write the name of the module(link npm import). 
+
 | param        |      Description      |
 |--------------|:---------------------:|
 | host         |                       |
@@ -275,7 +277,36 @@ cap_utils.addEnvironmentVar(host, [
       name: 'HomeModule',
       path: 'app/home/home.module',
       type: 'module'
+    },
+    {
+      name: 'CapStorageAWS',
+      path: 'cap-storage-aws',
+      type: 'module',
+      forRootValues: [
+          {
+            name: 'bucket',
+            value: `my-credentials`
+          },
+          {
+            name: 'accessKeyId',
+            value: `my-credentials`
+          },
+          {
+            name: 'secretAccessKey',
+            value: `my-credentials`
+          },
+          {
+            name: 'region',
+            value: `my-credentials`
+          },
+          {
+            name: 'folder',
+            value: `my-credentials`
+          }
+        ]
+      }]
     }]);
+
 ```
 
 <br>
