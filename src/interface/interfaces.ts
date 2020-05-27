@@ -7,7 +7,8 @@
 export interface importElementsModule {
   name: string;
   path: string;
-  type: string;
+  type: string;  
+  forRootValues?: forRootValuesI[]
 }
 
 

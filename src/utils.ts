@@ -20,13 +20,11 @@ import { InsertChange, Change, NoopChange } from '@schematics/angular/utility/ch
 
 import { buildDefaultPath } from 'schematics-utilities';
 import { DefaultTreeDocument, DefaultTreeElement, parse as parseHtml } from 'parse5';
-import { getSourceFile } from 'schematics-utilities/dist/cdk';
 
 //Importing interfaces
 import {
   EnvI,
   OptionsI,
-  forRootI,
   routerPathI,
   forRootValuesI,
   importElementsModule
@@ -305,9 +303,12 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
 
         if (element.path.charAt(0) === '@') {
           relativePath = element.path;
-        } else {
+        } else if(element.path.includes('/')){
           elementPath = `${options.path}/${element.path}`;
           relativePath = buildRelativePath(modulePath, elementPath);
+        }
+        else {
+          relativePath = element.path;
         }
         classifiedName = strings.classify(`${element.name}`);
         declarationChanges = addImportToModule(
@@ -317,12 +318,22 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
           relativePath);
 
         declarationRecorder = host.beginUpdate(modulePath);
-        for (const change of declarationChanges) {
-          if (change instanceof InsertChange) {
-            console.log('change: ', change);
-            console.log('change.pos: ', change.pos);
-            console.log('change.toAdd: ', change.toAdd);
-            declarationRecorder.insertLeft(change.pos, change.toAdd);
+        if(element.forRootValues){
+          for (const change of declarationChanges) {
+            if (change instanceof InsertChange) {
+              if (change.toAdd === `,\n    ${element.name}`) {
+                change.toAdd = `,
+    ${element.name}.forRoot({${addForRootValues(element.forRootValues)}
+    })`
+              }
+              declarationRecorder.insertLeft(change.pos, change.toAdd);
+            }
+          }
+        } else {
+          for (const change of declarationChanges) {
+            if (change instanceof InsertChange) {
+              declarationRecorder.insertLeft(change.pos, change.toAdd);
+            }
           }
         }
         host.commitUpdate(declarationRecorder);
@@ -1136,79 +1147,18 @@ export function addIdToElement(host: Tree, htmlFilePath: string, idName: string,
 }
 
 function addForRootValues(elements: forRootValuesI[]) {
+  let length = elements.length;
   let forRootValue = '';
-  elements.map(data => {
-    console.log('data: ', data);
-    forRootValue = forRootValue + `${data.name}: '${data.value},'\n`
+  elements.map((data, index) => {
+    if(length -1 === index){
+      forRootValue = `${forRootValue}
+      ${data.name}: '${data.value}'`
+    } else {
+      forRootValue = `${forRootValue}
+      ${data.name}: '${data.value}',`
+    }
   });
   return forRootValue;
-}
-
-
-export function addModuleWithForRootVars(host: Tree, module: forRootI, src: any) {
-  return (hostAux: Tree = host) => {
-    const moduleSource = getSourceFile(host, module.path);
-    if (!moduleSource) {
-      throw new SchematicsException(`Module not found: ${module.path}`);
-    }
-
-    const changes = addImportToModule(moduleSource as any, module.path, module.name, src);
-    let recorder = host.beginUpdate(module.path);
-
-    changes.forEach((change: any) => {
-      // if (change instanceof InsertChange) {
-      if (change.toAdd === `,\n    ${module.name}`) {
-        change.toAdd = `,\n    ${module.name}.forRoot({
-          ${addForRootValues(module.forRootVakues)}
-    })
-    `;
-      }
-      recorder.insertLeft(change.pos, change.toAdd);
-
-      // }
-    });
-    host.commitUpdate(recorder);
-
-    return hostAux;
-  }
-}
-
-
-export function root(host: Tree, options: any, module: forRootI) {
-  return (hostAux: Tree = host) => {
-
-    const modulePath = module.name;
-    // Import Header Component and declare
-    source = source = readIntoSourceFile(host, modulePath);
-    resetValuesImports();
-
-    elementPath = `${options.path}/${module.path}`;
-    relativePath = buildRelativePath(modulePath, elementPath);
-
-    classifiedName = strings.classify(`${module.name}`);
-    declarationChanges = addImportToModule(
-      source,
-      modulePath,
-      classifiedName,
-      relativePath);
-
-    declarationRecorder = host.beginUpdate(modulePath);
-    for (const change of declarationChanges) {
-      if (change instanceof InsertChange) {
-        if (change.toAdd === `,\n    ${module.name}`) {
-          change.toAdd = `,\n    ${module.name}.forRoot({
-            ${addForRootValues(module.forRootVakues)}
-      })
-      `;
-
-        }
-        declarationRecorder.insertLeft(change.pos, change.toAdd);
-      }
-    }
-    host.commitUpdate(declarationRecorder);
-    return hostAux;
-  }
-
 }
 
 export function addToPolyfillsFile(host: Tree, content: string) {
@@ -1236,7 +1186,7 @@ export function setupOptions(host: Tree, options: any) {
   if (options.path === undefined) {
     options.path = buildDefaultPath(project);
   }
-  
+
   options.module = findModule(host, options.path, 'app' + MODULE_EXT, ROUTING_MODULE_EXT);
   options.name = '';
   const parsedPath = parseName(options.path!, options.name);
