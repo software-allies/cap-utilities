@@ -26,7 +26,7 @@ import {
   EnvI,
   OptionsI,
   routerPathI,
-  forRootValuesI,
+  forRootParamsI,
   importElementsModule
 } from './interface/interfaces';
 
@@ -319,14 +319,27 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
 
         declarationRecorder = host.beginUpdate(modulePath);
         if(element.forRootValues){
-          for (const change of declarationChanges) {
-            if (change instanceof InsertChange) {
-              if (change.toAdd === `,\n    ${element.name}`) {
-                change.toAdd = `,
-    ${element.name}.forRoot({${addForRootValues(element.forRootValues)}
-    })`
+          if(element.forRootValues.configuration){
+            for (const change of declarationChanges) {
+              if (change instanceof InsertChange) {
+                if (change.toAdd === `,\n    ${element.name}`) {
+                  change.toAdd = `,
+      ${element.name}.forRoot(${element.forRootValues.configuration}, {${addForRootValues(element.forRootValues.params)}
+      })`
+                }
+                declarationRecorder.insertLeft(change.pos, change.toAdd);
               }
-              declarationRecorder.insertLeft(change.pos, change.toAdd);
+            }
+          } else {
+            for (const change of declarationChanges) {
+              if (change instanceof InsertChange) {
+                if (change.toAdd === `,\n    ${element.name}`) {
+                  change.toAdd = `,
+      ${element.name}.forRoot({${addForRootValues(element.forRootValues.params)}
+      })`
+                }
+                declarationRecorder.insertLeft(change.pos, change.toAdd);
+              }
             }
           }
         } else {
@@ -1146,7 +1159,7 @@ export function addIdToElement(host: Tree, htmlFilePath: string, idName: string,
   }
 }
 
-function addForRootValues(elements: forRootValuesI[]) {
+function addForRootValues(elements: forRootParamsI[]) {
   let length = elements.length;
   let forRootValue = '';
   elements.map((data, index) => {

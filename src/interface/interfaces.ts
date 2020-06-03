@@ -9,7 +9,7 @@ export interface importElementsModule {
   name: string;
   path: string;
   type: string;  
-  forRootValues?: forRootValuesI[]
+  forRootValues?: forRootValuesI
 }
 
 
@@ -53,9 +53,13 @@ export interface routerPathI {
   component: any
 }
 
-export interface forRootValuesI {
+export interface forRootParamsI {
   name: string;
   value: string;
+}
+export interface forRootValuesI {
+  configuration?: any;
+  params: forRootParamsI[];
 }
 
 /**
@@ -67,5 +71,5 @@ export interface forRootValuesI {
 export interface forRootI {
   name: string;
   path: string;
-  forRootVakues: forRootValuesI[];
+  forRootVakues: forRootValuesI;
 }
