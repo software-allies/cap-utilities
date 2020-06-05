@@ -55,7 +55,7 @@ export interface routerPathI {
 
 export interface forRootParamsI {
   name: string;
-  value: string;
+  value: any;
 }
 export interface forRootValuesI {
   configuration?: any;
