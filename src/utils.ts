@@ -324,8 +324,8 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
               if (change instanceof InsertChange) {
                 if (change.toAdd === `,\n    ${element.name}`) {
                   change.toAdd = `,
-      ${element.name}.forRoot(${element.forRootValues.configuration}, {${addForRootValues(element.forRootValues.params)}
-      })`
+    ${element.name}.forRoot(${element.forRootValues.configuration}, {${addForRootValues(element.forRootValues.params)}
+    })`
                 }
                 declarationRecorder.insertLeft(change.pos, change.toAdd);
               }
@@ -335,8 +335,8 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
               if (change instanceof InsertChange) {
                 if (change.toAdd === `,\n    ${element.name}`) {
                   change.toAdd = `,
-      ${element.name}.forRoot({${addForRootValues(element.forRootValues.params)}
-      })`
+    ${element.name}.forRoot({${addForRootValues(element.forRootValues.params)}
+    })`
                 }
                 declarationRecorder.insertLeft(change.pos, change.toAdd);
               }
@@ -1164,10 +1164,16 @@ function addForRootValues(elements: forRootParamsI[]) {
   let forRootValue = '';
   elements.map((data, index) => {
     if(length -1 === index){
-      forRootValue = `${forRootValue}
+      forRootValue = typeof data.value !== 'string' ? 
+      `${forRootValue}
+      ${data.name}: ${data.value}` :
+      `${forRootValue}
       ${data.name}: '${data.value}'`
     } else {
-      forRootValue = `${forRootValue}
+      forRootValue = typeof data.value !== 'string' ? 
+      `${forRootValue}
+      ${data.name}: ${data.value},` :
+      `${forRootValue}
       ${data.name}: '${data.value}',`
     }
   });
