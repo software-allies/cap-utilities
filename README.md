@@ -56,7 +56,7 @@ All credits go to the respective developers!
 
 ## **Importan**
 
-## **We are still working on the documentation of the functions (methods). **
+## __We are still working on the documentation of the functions (methods).__
 
 ## Functions 📂
 
@@ -153,13 +153,15 @@ astUtils.addRoutes(host, filePath, [
 | param        |      Description      |
 |--------------|:---------------------:|
 | host         |         Tree          |
-| routePaths   |    An array of objects that contains the environments data.       |
+| routePaths   |    An array of objects that contains the environments data.        |
 
-routePaths' interface 
-| env          | The environment to be added (example: prod, staging...) |
-| appPath      |application path (/src...)|
-| key          |The key to be added|
-| value          |The value to be added|
+__RoutePaths' interface__
+| Property        |      Description      |
+|--------------|:---------------------:|
+| env          | The environment to be added (example: prod, staging...)|
+| appPath      | application path (/src...) |
+| key          | The key to be added |
+| value          | The value to be added |
 
 ##### _@return void_ 
 
@@ -252,11 +254,31 @@ cap_utils.addEnvironmentVar(host, [
 
 *Note:* If you wanna include a module with the method forRoot into the app module, intance of write the path of the module write the name of the module(link npm import). 
 
-| param        |      Description      |
-|--------------|:---------------------:|
-| host         |                       |
-| options |                       |
-| elementsToImport    |                       |
+| param             |        Type         |                         Description                           |
+|-------------------|---------------------| :-----------------------------------------------------------: |
+| host              |        Tree         |                            Tree                               |
+| options           |        Any          | The available options for the schematic                       |
+| elementsToImport? |       Object        | Object of type importElementsModule                           |
+
+__importElementsModule' interface__
+| Property          |        Type         |                         Description                           |
+|-------------------|---------------------|:-------------------------------------------------------------:|
+| name              |       String        | Name of the component, module or service to import            |
+| path              |       String        | Path of the component, module or service to import            |
+| type              |       String        | Type of element to import __(component, module or service)__  |
+| forRootValues?    |       Object        | Object of type forRootValuesI                                 |
+
+__forRootValuesI__
+| Property          |        Type         |                         Description                           |
+|-------------------|---------------------|:-------------------------------------------------------------:|
+| configuration?    |         Any         | Property to append an object, array, etc before to the forRoot values|
+| params            |    Object array     | Params that needs the module into the forRoot method          |
+
+__forRootParamsI__
+| Property          |         Type        |                         Description                           |
+|-------------------|---------------------|:-------------------------------------------------------------:|
+| name              |         String      | Params's name                                                 |
+| value             |          Any        | Params's value                                                |
 
 ##### _@return_ 
 
@@ -345,7 +367,7 @@ cap_utils.addEnvironmentVar(host, [
 
 | param        |      Description      |
 |--------------|:---------------------:|
-| host         |                       |
+| host         |          Tree             |
 | htmlFilePath |                       |
 | elementHtml    |                       |
 | side    |                       |
@@ -384,7 +406,7 @@ cap_utils.addEnvironmentVar(host, [
 
 | param        |      Description      |
 |--------------|:---------------------:|
-| host         |                       |
+| host         |        Tree               |
 | mainPath |                       |
 
 ##### _@return_ 
