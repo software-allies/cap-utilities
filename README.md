@@ -258,9 +258,10 @@ cap_utils.addEnvironmentVar(host, [
 |-------------------|---------------------| :-----------------------------------------------------------: |
 | host              |        Tree         |                            Tree                               |
 | options           |        Any          | The available options for the schematic                       |
-| elementsToImport? |       Object        | Object of type importElementsModule                           |
+| elementsToImport? |    Object array     | Object array of type importElementsModulearray                |
 
 __importElementsModule' interface__
+
 | Property          |        Type         |                         Description                           |
 |-------------------|---------------------|:-------------------------------------------------------------:|
 | name              |       String        | Name of the component, module or service to import            |
@@ -269,12 +270,14 @@ __importElementsModule' interface__
 | forRootValues?    |       Object        | Object of type forRootValuesI                                 |
 
 __forRootValuesI__
+
 | Property          |        Type         |                         Description                           |
 |-------------------|---------------------|:-------------------------------------------------------------:|
 | configuration?    |         Any         | Property to append an object, array, etc before to the forRoot values|
 | params            |    Object array     | Params that needs the module into the forRoot method          |
 
 __forRootParamsI__
+
 | Property          |         Type        |                         Description                           |
 |-------------------|---------------------|:-------------------------------------------------------------:|
 | name              |         String      | Params's name                                                 |
