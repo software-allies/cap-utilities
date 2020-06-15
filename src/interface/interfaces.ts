@@ -73,3 +73,13 @@ export interface forRootI {
   path: string;
   forRootVakues: forRootValuesI;
 }
+
+/**
+  *gg iizi
+  * @param path Name of your current application.
+  * @param pathMatch URL of your logo. 
+  * @param component True or False to remove the content from the app.component.html.
+*/
+export interface objectKeys {
+  name: string;
+}

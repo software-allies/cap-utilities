@@ -27,7 +27,8 @@ import {
   OptionsI,
   routerPathI,
   forRootParamsI,
-  importElementsModule
+  importElementsModule,
+  // objectKeys
 } from './interface/interfaces';
 
 let source;
@@ -303,7 +304,7 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
 
         if (element.path.charAt(0) === '@') {
           relativePath = element.path;
-        } else if(element.path.includes('/')){
+        } else if (element.path.includes('/')) {
           elementPath = `${options.path}/${element.path}`;
           relativePath = buildRelativePath(modulePath, elementPath);
         }
@@ -318,8 +319,8 @@ export function addToNgModule(host: Tree, options: OptionsI, elementsToImport: i
           relativePath);
 
         declarationRecorder = host.beginUpdate(modulePath);
-        if(element.forRootValues){
-          if(element.forRootValues.configuration){
+        if (element.forRootValues) {
+          if (element.forRootValues.configuration) {
             for (const change of declarationChanges) {
               if (change instanceof InsertChange) {
                 if (change.toAdd === `,\n    ${element.name}`) {
@@ -1163,17 +1164,17 @@ function addForRootValues(elements: forRootParamsI[]) {
   let length = elements.length;
   let forRootValue = '';
   elements.map((data, index) => {
-    if(length -1 === index){
-      forRootValue = typeof data.value !== 'string' ? 
-      `${forRootValue}
+    if (length - 1 === index) {
+      forRootValue = typeof data.value !== 'string' ?
+        `${forRootValue}
       ${data.name}: ${data.value}` :
-      `${forRootValue}
+        `${forRootValue}
       ${data.name}: '${data.value}'`
     } else {
-      forRootValue = typeof data.value !== 'string' ? 
-      `${forRootValue}
+      forRootValue = typeof data.value !== 'string' ?
+        `${forRootValue}
       ${data.name}: ${data.value},` :
-      `${forRootValue}
+        `${forRootValue}
       ${data.name}: '${data.value}',`
     }
   });
@@ -1222,4 +1223,15 @@ export function setupOptions(host: Tree, options: any) {
     throw new SchematicsException(`Is required a project type of "application".`);
   }
   return host;
+}
+
+export function addToAngularJSONArchitectBudgets(host: Tree, data: any) {
+  const config = readConfig(host);
+  const appConfig = getAngularAppConfig(config);
+  if (appConfig) {
+    appConfig.architect.build['configurations']['production']['budgets'][1] = { ...data }
+    writeConfig(host, config);
+  } else {
+    console.log("Can't find an app.");
+  }
 }
