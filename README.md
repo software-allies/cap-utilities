@@ -46,6 +46,7 @@ import * as astUtils from 'cap-utilities'
 * [updateIndexHeadFile](#updateIndexHeadFile)
 * [updateBodyOfIndexFile](#updateBodyOfIndexFile)
 * [addIdToElement](#addIdToElement)
+* [addToAngularJSONArchitectBudgets](#addToAngularJSONArchitectBudgets)
 
 addIdToElement
 
@@ -610,6 +611,28 @@ function removeComponentHtml(filePath: string): Rule {
 
 <br>
 
+
+### addToAngularJSONArchitectBudgets
+
+#### Modify the budgets object within the Architect property of the Angular JSON File
+
+|     Property      |        Type         |                         Description                           |
+|-------------------|---------------------|:-------------------------------------------------------------:|
+|       host        |         Tree        |                                                               |
+|       data        |         any         | An object that it's going to modified the current budget information.|
+
+
+#### Example: 
+
+``` 
+  cap_utilities.addToAngularJSONArchitectBudgets(host, {
+    type: 'anyComponentStyle',
+    maximumWarning: '40kb',
+    maximumError: '50kb'
+  }
+```
+
+<br>
 
 ## License
 Apache-2.0  © [Software Allies](https://www.softwareallies.com/)
