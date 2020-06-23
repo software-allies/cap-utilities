@@ -8,7 +8,7 @@
 export interface importElementsModule {
   name: string;
   path: string;
-  type: string;  
+  type: string;
   forRootValues?: forRootValuesI
 }
 
@@ -82,4 +82,10 @@ export interface forRootI {
 */
 export interface objectKeys {
   name: string;
+}
+
+export interface packageI {
+  type: string;
+  pkg: string;
+  version: string;
 }

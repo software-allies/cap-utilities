@@ -28,6 +28,7 @@ import {
   routerPathI,
   forRootParamsI,
   importElementsModule,
+  packageI,
   // objectKeys
 } from './interface/interfaces';
 
@@ -1068,17 +1069,20 @@ export function hasBootstrap(host: Tree): boolean {
 /**
  * Adds a package to the package.json
  */
-export function addPackageToPackageJson(host: Tree, type: string, pkg: string, version: string) {
+export function addPackageToPackageJson(host: Tree, packages: packageI[]) {
+
   if (host.exists('package.json')) {
     const sourceText = host.read('package.json')!.toString('utf-8');
     const json = JSON.parse(sourceText);
-    if (!json[type]) {
-      json[type] = {};
-    }
-    if (!json[type][pkg]) {
-      json[type][pkg] = version;
-    }
-    host.overwrite('package.json', JSON.stringify(json, null, 2));
+    packages.forEach(pkges => {
+      if (!json[pkges.type]) {
+        json[pkges.type] = {};
+      }
+      if (!json[pkges.type][pkges.pkg]) {
+        json[pkges.type][pkges.pkg] = pkges.version;
+      }
+      host.overwrite('package.json', JSON.stringify(json, null, 2));
+    });
   }
   return host;
 }

@@ -236,7 +236,17 @@ cap_utils.addEnvironmentVar(host, [
 
 | param        |      Description      |
 |--------------|:---------------------:|
-|          |                       |
+|Host          |                       |
+|packages      |       Object's array of type packageI    |
+
+
+Package interface(packageI)
+
+|     Name     |      Value      |
+|--------------|:---------------:|
+|     type     |     String      |
+|     pkg      |     String      |
+|   version    |     String      |
 
 ##### _@return_ 
 
@@ -245,6 +255,38 @@ cap_utils.addEnvironmentVar(host, [
 #### Example: 
 
 ``` 
+export function addPackageJsonDependencies(): Rule {
+  return (host: Tree) => {
+    cap_utilities.addPackageToPackageJson(host, [
+      {
+        type: NodeDependencyType.Default,
+        pkg: 'cap-storage-aws',
+        version: '~3.0.3'
+      },
+      {
+        type: NodeDependencyType.Default,
+        pkg: 'aws-sdk',
+        version: '~2.701.0'
+      },
+      {
+        type: NodeDependencyType.Default,
+        pkg: 'ngx-file-drop',
+        version: '~9.0.1'
+      },
+      {
+        type: NodeDependencyType.Default,
+        pkg: 'sweetalert2',
+        version: '~9.15.1'
+      },{
+        type: NodeDependencyType.Default,
+        pkg: 'uuid',
+        version: '~8.1.0'
+      }
+    ])
+    // cap_utilities.addPackageToPackageJson(host, NodeDependencyType.Default, 'cap-storage-aws', '~3.0.3')
+    return host;
+  };
+}
 ```
 
 <br>
